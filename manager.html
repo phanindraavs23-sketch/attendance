@@ -50,7 +50,7 @@ th,td{padding:10px;border-bottom:1px solid #eee;text-align:left}
 </section></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script><script src="config.js"></script>
 <script>
 const sb=supabase.createClient(window.SUPABASE_URL,window.SUPABASE_KEY);
 let rows=[], assignedPeople=[];
@@ -83,13 +83,24 @@ async function boot(){
 async function logout(){await sb.auth.signOut();location.reload()}
 
 async function createSession(){
-  const token=crypto.randomUUID()+crypto.randomUUID().replaceAll('-','');
+  const {data:auth}=await sb.auth.getSession();
+  if(!auth?.session){alert('Please log in again before generating the QR code.');return}
+  const token=(crypto.randomUUID?crypto.randomUUID():Date.now().toString(36)+Math.random().toString(36).slice(2))+Math.random().toString(36).slice(2,12);
   const expires=new Date(Date.now()+10*60*1000).toISOString();
-  const {data,error}=await sb.from('attendance_sessions').insert({token,expires_at:expires}).select('token').single();
-  if(error){alert(error.message);return}
-  const url=location.href.replace(/(?:hr|manager)\.html.*$/,'')+'mark.html?session='+data.token;
-  qr.innerHTML='<img alt="Attendance QR" src="https://quickchart.io/qr?size=300&text='+encodeURIComponent(url)+'">';
-  link.textContent=url;
+  qr.innerHTML='<p class="muted">Creating QR code…</p>';
+  link.textContent='';
+  const {data,error}=await sb.from('attendance_sessions').insert({token,expires_at:expires,created_by:auth.session.user.id}).select('token').single();
+  if(error){qr.innerHTML='';alert('Could not create QR session: '+error.message);return}
+  const base=location.href.replace(/(?:hr|manager)\.html(?:\?.*)?$/,'');
+  const url=base+'mark.html?session='+encodeURIComponent(data.token);
+  qr.innerHTML='';
+  try{
+    new QRCode(document.getElementById('qr'),{text:url,width:300,height:300,correctLevel:QRCode.CorrectLevel.M});
+    link.innerHTML='<b>QR expires in 10 minutes.</b><br>'+esc(url);
+  }catch(e){
+    qr.innerHTML='<p class="error">QR generation failed: '+esc(e.message||e)+'</p>';
+    link.textContent=url;
+  }
 }
 
 function todayLocal(){
