@@ -30,13 +30,13 @@ async function boot(){
  if(!token)return showNoSession();
  const {data:s,error}=await sb.from('attendance_sessions').select('token,expires_at').eq('token',token).single();
  if(error||!s||new Date(s.expires_at)<=new Date())return fail('This QR session is expired or invalid. Please scan a new company QR code.');
- const {data:p,error:e}=await sb.from('people').select('id,name').eq('active',true).order('id');
+ const {data:p,error:e}=await sb.from('people').select('id,employee_id,name').eq('active',true).order('id');
  if(e)return fail(e.message);
  people=p||[];
  person.innerHTML='<option value="">Select employee name</option>'+people.map(x=>'<option value="'+x.id+'">'+esc(x.name)+'</option>').join('');
  attendanceForm.style.display='block'; notice.style.display='none';
 }
-function updateEmployeeId(){employeeId.value=person.value||'';}
+function updateEmployeeId(){ const p=people.find(x=>String(x.id)===String(person.value)); employeeId.value=p?.employee_id||''; }
 function showNoSession(){
  notice.style.display='block';
  notice.innerHTML='<h2>Please scan the company QR code</h2><p>This page can only be used after scanning a valid attendance QR code.</p><p>Ask your HR or Manager to display the current attendance QR code, then scan it with your phone.</p>';
@@ -49,7 +49,7 @@ async function mark(action){
  const name=people.find(p=>p.id===id)?.name||'';
  const {error}=await sb.from('attendance').insert({session_token:token,person_id:id,action,location:location.value.trim()});
  if(error)return fail(error.message);
- msg.innerHTML='<div class="ok"><b>'+esc(name)+'</b><br>Employee ID: <b>'+id+'</b><br>Location: <b>'+esc(location.value.trim())+'</b><br>Attendance <b>'+action+'</b> recorded successfully at '+new Date().toLocaleTimeString()+'.</div>';
+ msg.innerHTML='<div class="ok"><b>'+esc(name)+'</b><br>Employee ID: <b>'+esc(people.find(p=>p.id===id)?.employee_id||String(id))+'</b><br>Location: <b>'+esc(location.value.trim())+'</b><br>Attendance <b>'+action+'</b> recorded successfully at '+new Date().toLocaleTimeString()+'.</div>';
 }
 function fail(x){msg.innerHTML='<p class="error">'+esc(x)+'</p>'}
 function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
