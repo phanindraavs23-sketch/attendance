@@ -1,16 +1,16 @@
 118 Employee QR Attendance - GitHub Pages + Supabase
 
 GitHub Pages:
-https://phanindraavs23-sketch.github.io/118attendance/
+https://phanindraavs23-sketch.github.io/attendance/
 
 EMPLOYEE:
-https://phanindraavs23-sketch.github.io/118attendance/
+https://phanindraavs23-sketch.github.io/attendance/
 
 HR:
-https://phanindraavs23-sketch.github.io/118attendance/hr.html
+https://phanindraavs23-sketch.github.io/attendance/hr.html
 
 MANAGER:
-https://phanindraavs23-sketch.github.io/118attendance/manager.html
+https://phanindraavs23-sketch.github.io/attendance/manager.html
 
 The HR and Manager dashboards are separate HTML pages with separate role checks.
 HR users must have role HR in public.admin_roles.
