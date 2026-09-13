@@ -104,7 +104,7 @@ async function loadAttendance(){
   const day=selectedDate();
   const bounds=dateBounds(day);
   const {data,error}=await sb.from('attendance')
-    .select('person_id,action,recorded_at,people(name)')
+    .select('person_id,action,recorded_at,location,people(name)')
     .gte('recorded_at',bounds.start)
     .lt('recorded_at',bounds.end)
     .order('recorded_at',{ascending:false});
@@ -118,17 +118,17 @@ function render(){
   total.textContent=f.length;
   logins.textContent=f.filter(r=>r.action==='LOGIN').length;
   logouts.textContent=f.filter(r=>r.action==='LOGOUT').length;
-  records.innerHTML='<table><tr><th>Person</th><th>Action</th><th>Time</th></tr>'+
-    f.map(r=>'<tr><td>'+esc(r.people?.name||'')+'</td><td>'+esc(r.action)+'</td><td>'+esc(new Date(r.recorded_at).toLocaleString())+'</td></tr>').join('')+'</table>';
+  records.innerHTML='<table><tr><th>Employee ID</th><th>Name</th><th>Location</th><th>Action</th><th>Time</th></tr>'+
+    f.map(r=>'<tr><td>'+esc(r.person_id)+'</td><td>'+esc(r.people?.name||'')+'</td><td>'+esc(r.location||'')+'</td><td>'+esc(r.action)+'</td><td>'+esc(new Date(r.recorded_at).toLocaleString())+'</td></tr>').join('')+'</table>';
 }
 
 function exportCSV(){
   const q=(search.value||'').toLowerCase();
   const f=rows.filter(r=>(r.people?.name||'').toLowerCase().includes(q));
   if(!f.length){alert('No records for '+selectedDate());return}
-  const csv='Person ID,Person,Action,Date,Time\n'+f.map(r=>{
+  const csv='Employee ID,Name,Location,Action,Date,Time\n'+f.map(r=>{
     const d=new Date(r.recorded_at);
-    return [r.person_id,r.people?.name||'',r.action,selectedDate(),d.toLocaleTimeString()].map(x=>'\"'+String(x).replaceAll('\"','\"\"')+'\"').join(',');
+    return [r.person_id,r.people?.name||'',r.location||'',r.action,selectedDate(),d.toLocaleTimeString()].map(x=>'\"'+String(x).replaceAll('\"','\"\"')+'\"').join(',');
   }).join('\n');
   const a=document.createElement('a');
   a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
