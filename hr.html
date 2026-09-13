@@ -38,6 +38,13 @@ table{width:100%;border-collapse:collapse;margin-top:14px} th,td{padding:11px;bo
 .cal-day.leave.holiday{background:linear-gradient(135deg,#ffd6d6 50%,#d8f5df 50%)}
 .cal-label{display:block;font-size:11px;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 @media(max-width:800px){.cal-dow,.cal-day{padding:7px;min-height:45px;font-size:12px}}
+
+.pendingb{background:#fff3cd;color:#92650a}
+.approvedb{background:#e8f7ed;color:#0f6b3a}
+.rejectedb{background:#fdecec;color:#b42318}
+.leave-tabs{display:flex;gap:8px;margin-bottom:12px}
+.leave-tab{padding:8px 14px;border-radius:20px;border:1px solid #ddd;background:#fff;color:#111;cursor:pointer;font-size:14px}
+.leave-tab.active{background:#111;color:#fff;border-color:#111}
 </style>
 </head>
 <body>
@@ -66,6 +73,21 @@ table{width:100%;border-collapse:collapse;margin-top:14px} th,td{padding:11px;bo
 <div class="stat">Employees today<div id="employees" class="num">0</div></div>
 </div>
 <div class="card calendar-card"><div id="attendanceCalendar"></div></div>
+<div class="card">
+<h2 style="margin-top:0">Leave Decisions</h2>
+<p class="small" style="margin-top:-6px">Requests the manager has approved or rejected. HR can view but does not approve here.</p>
+<div class="leave-tabs">
+<button class="leave-tab active" data-status="ALL" onclick="setLeaveTab('ALL')">All decided</button>
+<button class="leave-tab" data-status="APPROVED" onclick="setLeaveTab('APPROVED')">Approved</button>
+<button class="leave-tab" data-status="REJECTED" onclick="setLeaveTab('REJECTED')">Rejected</button>
+<button class="leave-tab" data-status="PENDING" onclick="setLeaveTab('PENDING')">Pending</button>
+</div>
+<div id="leaveMsg" class="small" style="margin-bottom:8px"></div>
+<table>
+<thead><tr><th>Name</th><th>Employee ID</th><th>Dates</th><th>Reason</th><th>Status</th><th>Requested</th><th>Decided by</th></tr></thead>
+<tbody id="leaveRows"></tbody>
+</table>
+</div>
 <div class="card">
 <div class="controls">
 <input id="search" placeholder="Search name / employee ID / location">
@@ -119,6 +141,7 @@ async function start() {
   document.getElementById('app').style.display = 'block';
   document.getElementById('userEmail').textContent = user.email || '';
   loadData();
+  loadLeaveRequests();
 }
 
 async function logout() {
@@ -217,6 +240,51 @@ function exportCSV() {
   URL.revokeObjectURL(url);
 }
 
+
+let allLeaveRequests = [];
+let leaveTab = 'ALL';
+
+function setLeaveTab(status) {
+  leaveTab = status;
+  document.querySelectorAll('.leave-tab').forEach(b => {
+    b.classList.toggle('active', b.dataset.status === status);
+  });
+  renderLeaveRequests();
+}
+
+async function loadLeaveRequests() {
+  const msg = document.getElementById('leaveMsg');
+  msg.textContent = 'Loading...';
+  const { data, error } = await sb.from('leave_requests')
+    .select('id,employee_name,employee_id,location,start_date,end_date,reason,status,requested_at,decided_by,manager_note')
+    .order('requested_at', { ascending: false })
+    .limit(2000);
+  if (error) {
+    msg.innerHTML = '<span class="error">' + esc(error.message) + '</span>';
+    return;
+  }
+  allLeaveRequests = data || [];
+  renderLeaveRequests();
+}
+
+function renderLeaveRequests() {
+  const decided = allLeaveRequests.filter(r => r.status === 'APPROVED' || r.status === 'REJECTED');
+  const rows = leaveTab === 'ALL'
+    ? decided
+    : allLeaveRequests.filter(r => r.status === leaveTab);
+
+  document.getElementById('leaveRows').innerHTML = rows.map(r => {
+    const badgeClass = r.status === 'APPROVED' ? 'approvedb' : r.status === 'REJECTED' ? 'rejectedb' : 'pendingb';
+    return '<tr><td>' + esc(r.employee_name) + '</td><td>' + esc(r.employee_id) + '</td>' +
+      '<td>' + esc(r.start_date) + ' to ' + esc(r.end_date) + '</td>' +
+      '<td>' + esc(r.reason) + '</td>' +
+      '<td><span class="badge ' + badgeClass + '">' + r.status + '</span></td>' +
+      '<td>' + formatTime(r.requested_at) + '</td>' +
+      '<td class="small">' + (r.decided_by ? esc(r.decided_by) : '—') + '</td></tr>';
+  }).join('') || '<tr><td colspan="7">No leave requests found.</td></tr>';
+
+  document.getElementById('leaveMsg').textContent = rows.length + ' request(s)';
+}
 
 function renderAttendanceCalendar() {
   const root = document.getElementById('attendanceCalendar');
