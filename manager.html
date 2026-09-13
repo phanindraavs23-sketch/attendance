@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Manager Dashboard</title><style>
+body{font-family:Arial,sans-serif;margin:0;background:#f4f6f8;color:#111}
+.wrap{max-width:1200px;margin:25px auto;padding:16px}
+.card{background:#fff;padding:22px;border-radius:16px;margin:15px 0;box-shadow:0 4px 18px #0001}
+.header{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+input,button,select{padding:11px;font-size:15px;border-radius:9px;border:1px solid #ccd2d8}
+button{background:#111;color:#fff;border:0;cursor:pointer}
+button.secondary{background:#666}
+table{width:100%;border-collapse:collapse;margin-top:15px}
+th,td{padding:10px;border-bottom:1px solid #eee;text-align:left}
+.stat{display:inline-block;min-width:150px;margin:6px;padding:16px;border-radius:12px;background:#f0f2f5}
+.stat b{font-size:26px;display:block;margin-top:5px}
+.hidden{display:none}.error{color:#b42318}.ok{color:#087443}.muted{color:#666}
+#qr img{max-width:280px}
+@media(max-width:700px){table{font-size:13px}.stat{min-width:120px}}
+</style></head>
+<body><div class="wrap">
+<div class="card header"><div><h1>Manager Dashboard</h1><p class="muted">Attendance for employees assigned to your team</p></div><button onclick="logout()">Logout</button></div>
+
+<div id="login" class="card">
+<h2>Manager Login</h2>
+<div class="row"><input id="email" type="email" placeholder="Manager email">
+<input id="pass" type="password" placeholder="Password">
+<button onclick="login()">Login</button></div>
+<p id="msg" class="error"></p>
+</div>
+
+<section id="app" class="hidden">
+<div class="card"><h2>Overview</h2><p id="userInfo" class="muted"></p>
+<div class="stat">Records<b id="total">0</b></div>
+<div class="stat">Logins<b id="logins">0</b></div>
+<div class="stat">Logouts<b id="logouts">0</b></div>
+</div>
+
+<div class="card"><h2>Attendance QR</h2>
+<p class="muted">Generate a 10-minute QR code for employees to scan.</p>
+<button onclick="createSession()">Generate New QR</button>
+<div id="qr"></div><p id="link" class="muted"></p>
+</div>
+
+<div class="card"><h2>My Team</h2><div id="peopleBox"></div></div>
+
+<div class="card"><h2>Attendance Records</h2>
+<div class="row"><label for="dateFilter"><b>Date:</b></label><input id="dateFilter" type="date" onchange="loadAttendance()"> <input id="search" placeholder="Search person" oninput="render()">
+<button onclick="loadAttendance()">Refresh</button><button onclick="exportCSV()">Export CSV</button></div>
+<div id="records"></div></div>
+</section></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script>
+const sb=supabase.createClient(window.SUPABASE_URL,window.SUPABASE_KEY);
+let rows=[], assignedPeople=[];
+document.addEventListener('DOMContentLoaded',()=>{ dateFilter.value=todayLocal(); });
+
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function showLoggedIn(v){document.getElementById('login').classList.toggle('hidden',v);document.getElementById('app').classList.toggle('hidden',!v)}
+
+async function login(){
+  msg.textContent='';
+  const {data,error}=await sb.auth.signInWithPassword({email:email.value.trim(),password:pass.value});
+  if(error){msg.textContent=error.message;return}
+  const {data:p,error:e}=await sb.from('profiles').select('role').eq('id',data.user.id).single();
+  if(e || p?.role !== 'manager'){await sb.auth.signOut();msg.textContent='This account is not authorized for the Manager portal.';return}
+  showLoggedIn(true); userInfo.textContent='Signed in as '+data.user.email+' • Role: '+p.role;
+  await loadAttendance();
+  await loadPeople();
+}
+
+async function boot(){
+  const {data}=await sb.auth.getSession();
+  if(!data.session){showLoggedIn(false);return}
+  const {data:p}=await sb.from('profiles').select('role').eq('id',data.session.user.id).single();
+  if(!p || p.role!=='manager'){await sb.auth.signOut();showLoggedIn(false);return}
+  showLoggedIn(true);userInfo.textContent='Signed in as '+data.session.user.email+' • Role: '+p.role;
+  await loadAttendance();
+  await loadPeople();
+}
+
+async function logout(){await sb.auth.signOut();location.reload()}
+
+async function createSession(){
+  const token=crypto.randomUUID()+crypto.randomUUID().replaceAll('-','');
+  const expires=new Date(Date.now()+10*60*1000).toISOString();
+  const {data,error}=await sb.from('attendance_sessions').insert({token,expires_at:expires}).select('token').single();
+  if(error){alert(error.message);return}
+  const url=location.href.replace(/(?:hr|manager)\.html.*$/,'')+'mark.html?session='+data.token;
+  qr.innerHTML='<img alt="Attendance QR" src="https://quickchart.io/qr?size=300&text='+encodeURIComponent(url)+'">';
+  link.textContent=url;
+}
+
+function todayLocal(){
+  const d=new Date();
+  const y=d.getFullYear(), m=String(d.getMonth()+1).padStart(2,'0'), day=String(d.getDate()).padStart(2,'0');
+  return `${y}-${m}-${day}`;
+}
+function selectedDate(){ return dateFilter.value || todayLocal(); }
+function dateBounds(dateStr){ const start=new Date(dateStr+'T00:00:00'); const end=new Date(start); end.setDate(end.getDate()+1); return {start:start.toISOString(),end:end.toISOString()}; }
+
+async function loadAttendance(){
+  const day=selectedDate();
+  const bounds=dateBounds(day);
+  const {data,error}=await sb.from('attendance')
+    .select('person_id,action,recorded_at,people(name)')
+    .gte('recorded_at',bounds.start)
+    .lt('recorded_at',bounds.end)
+    .order('recorded_at',{ascending:false});
+  if(error){records.innerHTML='<p class="error">'+esc(error.message)+'</p>';return}
+  rows=data||[];render();
+}
+
+function render(){
+  const q=(search.value||'').toLowerCase();
+  const f=rows.filter(r=>(r.people?.name||'').toLowerCase().includes(q));
+  total.textContent=f.length;
+  logins.textContent=f.filter(r=>r.action==='LOGIN').length;
+  logouts.textContent=f.filter(r=>r.action==='LOGOUT').length;
+  records.innerHTML='<table><tr><th>Person</th><th>Action</th><th>Time</th></tr>'+
+    f.map(r=>'<tr><td>'+esc(r.people?.name||'')+'</td><td>'+esc(r.action)+'</td><td>'+esc(new Date(r.recorded_at).toLocaleString())+'</td></tr>').join('')+'</table>';
+}
+
+function exportCSV(){
+  const q=(search.value||'').toLowerCase();
+  const f=rows.filter(r=>(r.people?.name||'').toLowerCase().includes(q));
+  if(!f.length){alert('No records for '+selectedDate());return}
+  const csv='Person ID,Person,Action,Date,Time\n'+f.map(r=>{
+    const d=new Date(r.recorded_at);
+    return [r.person_id,r.people?.name||'',r.action,selectedDate(),d.toLocaleTimeString()].map(x=>'\"'+String(x).replaceAll('\"','\"\"')+'\"').join(',');
+  }).join('\n');
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
+  a.download='manager-attendance-' + selectedDate() + '.csv';
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+
+async function loadPeople(){
+  const {data:links,error:linkError}=await sb.from('manager_people').select('person_id').eq('manager_id',(await sb.auth.getUser()).data.user.id);
+  if(linkError){peopleBox.innerHTML='<p class="error">'+esc(linkError.message)+'</p>';return}
+  const ids=(links||[]).map(x=>x.person_id);
+  if(!ids.length){assignedPeople=[];peopleBox.innerHTML='<p class="muted">No employees are assigned to you.</p>';return}
+  const {data,error}=await sb.from('people').select('id,name,active').in('id',ids).eq('active',true).order('id');
+  if(error){peopleBox.innerHTML='<p class="error">'+esc(error.message)+'</p>';return}
+  assignedPeople=data||[];
+  peopleBox.innerHTML='<table><tr><th>ID</th><th>Name</th><th>Status</th></tr>'+assignedPeople.map(p=>'<tr><td>'+p.id+'</td><td>'+esc(p.name)+'</td><td>Active</td></tr>').join('')+'</table>';
+}
+
+boot();
+</script></body></html>

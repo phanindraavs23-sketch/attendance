@@ -1,0 +1,35 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Employee Attendance</title>
+<style>
+body{font-family:Arial;background:#f4f6f8;margin:0}.wrap{max-width:600px;margin:30px auto;padding:16px}
+.card{background:#fff;padding:24px;border-radius:16px;box-shadow:0 4px 18px #0001}
+select,input,button{width:100%;padding:14px;margin-top:10px;font-size:18px;border-radius:9px;box-sizing:border-box}
+button{background:#111;color:#fff;border:0}.ok{padding:12px;background:#e8f7ed;margin-top:15px;border-radius:9px}.error{color:#b42318}
+.muted{color:#666}
+</style></head>
+<body><div class="wrap"><div class="card"><h1>Employee Attendance</h1>
+<p class="muted">Scan the company QR, select your name, then choose Login or Logout.</p>
+<select id="person"></select><input id="location" placeholder="Enter location (e.g. Office / Home)" autocomplete="off"><button onclick="mark('LOGIN')">Login</button><button onclick="mark('LOGOUT')">Logout</button><div id="msg"></div>
+</div></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config.js"></script><script>
+const sb=supabase.createClient(window.SUPABASE_URL,window.SUPABASE_KEY);
+const token=new URLSearchParams(location.search).get('session');
+async function boot(){
+ if(!token)return fail('Invalid QR link.');
+ const {data:s,error}=await sb.from('attendance_sessions').select('token,expires_at').eq('token',token).single();
+ if(error||!s||new Date(s.expires_at)<=new Date())return fail('This QR session is expired or invalid.');
+ const {data:p,error:e}=await sb.from('people').select('id,name').eq('active',true).order('id');
+ if(e)return fail(e.message);
+ person.innerHTML='<option value="">Select person</option>'+p.map(x=>'<option value="'+x.id+'">'+x.id+' — '+esc(x.name)+'</option>').join('');
+}
+async function mark(action){
+ if(!person.value)return alert('Select your name.');
+ if(!location.value.trim())return alert('Enter your location.');
+ const {error}=await sb.from('attendance').insert({session_token:token,person_id:Number(person.value),action,location:location.value.trim()});
+ if(error)return fail(error.message);
+ msg.innerHTML='<div class="ok">Attendance '+action+' recorded successfully at '+new Date().toLocaleTimeString()+'.</div>';
+}
+function fail(x){msg.innerHTML='<p class="error">'+esc(x)+'</p>'}
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+boot();
+</script></body></html>
