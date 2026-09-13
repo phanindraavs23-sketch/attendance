@@ -1,21 +1,145 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>118 Employee Attendance</title>
 <style>
-body{font-family:Arial,sans-serif;background:#f4f6f8;margin:0;color:#111}.wrap{max-width:620px;margin:25px auto;padding:16px}.card{background:#fff;padding:26px;border-radius:18px;box-shadow:0 4px 20px #0001}.qrbox{text-align:center;background:#f8f9fa;border:1px solid #ddd;border-radius:12px;padding:18px;margin:18px 0}.qrbox img{width:240px;height:240px;display:block;margin:10px auto}.muted{color:#555;line-height:1.5}.label{display:block;margin-top:14px;font-weight:bold}.field,select,button{width:100%;box-sizing:border-box;padding:14px;margin-top:7px;font-size:18px;border-radius:10px}select,.field{border:1px solid #aaa;background:#fff}.field[readonly]{background:#f1f3f5}button{border:0;background:#111;color:#fff;cursor:pointer;margin-top:12px}.ok{background:#e8f7ed;padding:15px;border-radius:10px;margin-top:15px}.error{background:#fdecec;color:#b42318;padding:15px;border-radius:10px;margin-top:15px}.small{font-size:13px;color:#666}
-</style></head><body><div class="wrap"><div class="card">
-<h1>Employee Attendance</h1><p class="muted">Scan the QR code or open this page. Select your name, verify your Employee ID, enter your location, then choose Login or Logout.</p>
-<div class="qrbox"><h2>Company Attendance QR</h2><div id="qrcode"></div><p class="small">Scan this QR code with your phone to open the attendance form.</p></div>
-<label class="label" for="person">Employee Name</label><select id="person" onchange="updateId()"><option value="">Loading employees...</option></select>
-<label class="label" for="employeeId">Employee ID</label><input class="field" id="employeeId" readonly placeholder="Employee ID">
-<label class="label" for="location">Location</label><input class="field" id="location" placeholder="Enter location (e.g. Office / Home)" autocomplete="off">
-<button onclick="mark('LOGIN')">Login</button><button onclick="mark('LOGOUT')">Logout</button><div id="msg"></div>
+body{font-family:Arial,sans-serif;background:#f4f6f8;margin:0;color:#111}
+.wrap{max-width:620px;margin:25px auto;padding:16px}
+.card{background:#fff;padding:26px;border-radius:18px;box-shadow:0 4px 20px #0001}
+.qrbox{text-align:center;background:#f8f9fa;border:1px solid #ddd;border-radius:12px;padding:18px;margin:18px 0}
+.qrbox img{width:240px;height:240px;display:block;margin:10px auto}
+.muted{color:#555;line-height:1.5}
+.label{display:block;margin-top:14px;font-weight:bold}
+.field,button{width:100%;box-sizing:border-box;padding:14px;margin-top:7px;font-size:18px;border-radius:10px}
+.field{border:1px solid #aaa;background:#fff}
+button{border:0;background:#111;color:#fff;cursor:pointer;margin-top:12px}
+button:disabled{opacity:.55;cursor:not-allowed}
+.logout{background:#555}
+.ok{background:#e8f7ed;padding:15px;border-radius:10px;margin-top:15px}
+.error{background:#fdecec;color:#b42318;padding:15px;border-radius:10px;margin-top:15px}
+.small{font-size:13px;color:#666}
+.hint{font-size:14px;color:#555;margin-top:5px}
+</style>
+</head>
+<body>
+<div class="wrap"><div class="card">
+<h1>Employee Attendance</h1>
+<p class="muted">Scan the QR code to open this form. Enter or verify your Name, Employee ID and Location, then choose Login or Logout.</p>
+
+<div class="qrbox">
+<h2>Company Attendance QR</h2>
+<div id="qrcode"></div>
+<p class="small">Scan this QR code with your phone to open the attendance form.</p>
+</div>
+
+<label class="label" for="employeeName">Employee Name</label>
+<input class="field" id="employeeName" placeholder="Enter employee name" autocomplete="name">
+
+<label class="label" for="employeeId">Employee ID</label>
+<input class="field" id="employeeId" placeholder="Enter Employee ID" autocomplete="off">
+
+<label class="label" for="employeeLocation">Location</label>
+<input class="field" id="employeeLocation" placeholder="Enter location (e.g. Office / Home)" autocomplete="off">
+
+<button id="loginBtn" onclick="mark('LOGIN')">Login</button>
+<button id="logoutBtn" class="logout" onclick="mark('LOGOUT')">Logout</button>
+<div id="msg"></div>
 </div></div>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script><script src="config.js"></script><script>
-const sb=supabase.createClient(window.SUPABASE_URL,window.SUPABASE_KEY);let people=[];
-const qrUrl=new URL('attendance.html',location.href).href;new QRCode(document.getElementById('qrcode'),{text:qrUrl,width:240,height:240,correctLevel:QRCode.CorrectLevel.M});
-async function boot(){const {data,error}=await sb.from('people').select('id,name,employee_id').eq('active',true).order('id');if(error){return fail(error.message)}people=data||[];person.innerHTML='<option value="">Select employee name</option>'+people.map(p=>'<option value="'+p.id+'">'+esc(p.name)+'</option>').join('');}
-function updateId(){const p=people.find(x=>String(x.id)===person.value);employeeId.value=p?.employee_id||''}
-async function mark(action){const p=people.find(x=>String(x.id)===person.value);const loc=location.value.trim();if(!p)return fail('Please select your employee name.');if(!loc)return fail('Please enter your location.');const payload={person_id:p.id,employee_id:p.employee_id,employee_name:p.name,location:loc,action};const {error}=await sb.from('attendance').insert(payload);if(error)return fail(error.message);msg.innerHTML='<div class="ok"><b>'+esc(p.name)+'</b><br>Employee ID: <b>'+esc(p.employee_id)+'</b><br>Location: <b>'+esc(loc)+'</b><br>Attendance <b>'+action+'</b> recorded at '+new Date().toLocaleString()+'.</div>';}
-function fail(x){msg.innerHTML='<div class="error">'+esc(x)+'</div>'}function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}boot();
-</script></body></html>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="config.js"></script>
+<script src="qr_daily.js"></script>
+<script>
+const sb = supabase.createClient(window.SUPABASE_URL, window.SUPABASE_KEY);
+const nameInput = document.getElementById('employeeName');
+const idInput = document.getElementById('employeeId');
+const locationInput = document.getElementById('employeeLocation');
+const msg = document.getElementById('msg');
+
+const params = new URLSearchParams(window.location.search);
+const qrName = params.get('name') || '';
+const qrEmployeeId = params.get('employeeId') || params.get('employee_id') || '';
+const qrLocation = params.get('location') || '';
+const scannedDate = params.get('d');
+const scannedToken = params.get('t');
+
+if (qrName) nameInput.value = qrName;
+if (qrEmployeeId) idInput.value = qrEmployeeId;
+if (qrLocation) locationInput.value = qrLocation;
+
+// If this page was opened via a QR code carrying a d/t pair, make sure it's
+// today's QR and not an old, expired one (see qr_daily.js).
+let qrExpired = false;
+if (scannedDate || scannedToken) {
+  qrExpired = !window.QRDaily.isTodayToken(scannedDate, scannedToken);
+}
+if (qrExpired) {
+  msg.innerHTML = '<div class="error">This QR code has expired. Please scan today\'s Company Attendance QR code and try again.</div>';
+  setBusy(true);
+}
+
+const qrTarget = new URL('attendance.html', window.location.href).href;
+function renderQr() {
+  const qrEl = document.getElementById('qrcode');
+  qrEl.innerHTML = '';
+  new QRCode(qrEl, {
+    text: window.QRDaily.buildDailyQrUrl(qrTarget),
+    width: 240, height: 240, correctLevel: QRCode.CorrectLevel.M
+  });
+}
+window.QRDaily.scheduleDailyRefresh(renderQr);
+
+async function mark(action) {
+  if (qrExpired) return fail('This QR code has expired. Please scan today\'s Company Attendance QR code and try again.');
+  const employeeName = nameInput.value.trim();
+  const employeeId = idInput.value.trim();
+  const employeeLocation = locationInput.value.trim();
+
+  if (!employeeName) return fail('Please enter your employee name.');
+  if (!employeeId) return fail('Please enter your Employee ID.');
+  if (!employeeLocation) return fail('Please enter your location.');
+
+  setBusy(true);
+  msg.innerHTML = '';
+
+  // recorded_at is generated by Supabase/PostgreSQL (server time).
+  const { error } = await sb.from('attendance').insert({
+    employee_id: employeeId,
+    employee_name: employeeName,
+    location: employeeLocation,
+    action: action
+  });
+
+  setBusy(false);
+  if (error) {
+    if ((error.message || '').toLowerCase().includes('session_token')) {
+      return fail('Supabase still requires the old session_token column. Run supabase/fix_session_token.sql in Supabase SQL Editor, then try again.');
+    }
+    return fail(error.message);
+  }
+
+  msg.innerHTML = '<div class="ok"><b>' + esc(employeeName) + '</b><br>' +
+    'Employee ID: <b>' + esc(employeeId) + '</b><br>' +
+    'Location: <b>' + esc(employeeLocation) + '</b><br>' +
+    'Attendance <b>' + action + '</b> recorded successfully.<br>' +
+    '<span class="small">Date/time is saved automatically by the Supabase server.</span></div>';
+}
+
+function setBusy(busy) {
+  document.getElementById('loginBtn').disabled = busy;
+  document.getElementById('logoutBtn').disabled = busy;
+}
+function fail(x) {
+  msg.innerHTML = '<div class="error">' + esc(x) + '</div>';
+}
+function esc(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  }[c]));
+}
+</script>
+</body>
+</html>

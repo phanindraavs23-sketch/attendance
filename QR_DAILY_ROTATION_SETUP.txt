@@ -1,0 +1,40 @@
+DAILY-ROTATING ATTENDANCE QR CODE
+
+The Company Attendance QR shown on index.html / attendance.html now
+refreshes automatically every 24 hours (at local midnight), and a QR
+code from a previous day is rejected if scanned.
+
+FILES INVOLVED
+  - qr_daily.js         New shared helper (token generation + validation)
+  - config.js            Added: window.QR_DAILY_SECRET
+  - index.html            Updated to render + auto-refresh the QR, and to
+                          reject an expired scanned link
+  - attendance.html      Same updates as index.html
+
+SETUP
+  1. Open config.js and change QR_DAILY_SECRET to your own random string:
+       window.QR_DAILY_SECRET = "put-your-own-random-string-here";
+     Use the SAME value in the one config.js used by both pages.
+  2. Upload qr_daily.js, config.js, index.html and attendance.html together.
+
+HOW IT WORKS
+  - The QR encodes a link like:  attendance.html?d=2026-09-13&t=<token>
+  - <token> is derived from the date + QR_DAILY_SECRET.
+  - When someone opens attendance.html via that link, the page recomputes
+    the expected token for today's date and compares it. If the date in
+    the link isn't today, or the token doesn't match, Login/Logout are
+    disabled and the visitor sees "This QR code has expired."
+  - If a kiosk/tablet is left open showing index.html or attendance.html,
+    the QR image itself will silently regenerate the moment local midnight
+    passes, so nobody needs to manually refresh the page.
+
+IMPORTANT LIMITATION (please read)
+  This project is a static site with no server-side function keeping a
+  private secret — everything, including QR_DAILY_SECRET, is visible to
+  anyone who views the page source. That means this rotation stops casual
+  reuse of an old QR-code photo/screenshot from a previous day, but a
+  technically determined person could read the code and compute a future
+  day's token themselves. It is a soft anti-reuse measure, not
+  unspoofable security. True tamper-proof validation would require
+  checking the token in a backend (e.g. a Supabase Edge Function) instead
+  of in the browser — let me know if you'd like that built instead.

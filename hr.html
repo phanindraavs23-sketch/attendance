@@ -1,153 +1,297 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>HR Dashboard</title><style>
-body{font-family:Arial,sans-serif;margin:0;background:#f4f6f8;color:#111}
-.wrap{max-width:1200px;margin:25px auto;padding:16px}
-.card{background:#fff;padding:22px;border-radius:16px;margin:15px 0;box-shadow:0 4px 18px #0001}
-.header{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
-.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-input,button,select{padding:11px;font-size:15px;border-radius:9px;border:1px solid #ccd2d8}
-button{background:#111;color:#fff;border:0;cursor:pointer}
-button.secondary{background:#666}
-table{width:100%;border-collapse:collapse;margin-top:15px}
-th,td{padding:10px;border-bottom:1px solid #eee;text-align:left}
-.stat{display:inline-block;min-width:150px;margin:6px;padding:16px;border-radius:12px;background:#f0f2f5}
-.stat b{font-size:26px;display:block;margin-top:5px}
-.hidden{display:none}.error{color:#b42318}.ok{color:#087443}.muted{color:#666}
-#qr img{max-width:280px}
-@media(max-width:700px){table{font-size:13px}.stat{min-width:120px}}
-</style></head>
-<body><div class="wrap">
-<div class="card header"><div><h1>HR Dashboard</h1><p class="muted">Full attendance visibility and HR controls</p></div><button onclick="logout()">Logout</button></div>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>118 Attendance — HR Dashboard</title>
+<style>
+body{font-family:Arial,sans-serif;background:#f4f6f8;margin:0;color:#111}
+.wrap{max-width:1250px;margin:0 auto;padding:22px}
+.card{background:#fff;padding:20px;border-radius:16px;box-shadow:0 4px 20px #0001;margin-bottom:18px}
+h1{margin-top:0} .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.stat{padding:18px;border:1px solid #ddd;border-radius:12px} .num{font-size:30px;font-weight:bold;margin-top:5px}
+.controls{display:grid;grid-template-columns:2fr 1fr 1fr 1fr auto;gap:10px}
+input,select,button{box-sizing:border-box;padding:11px;border:1px solid #aaa;border-radius:9px;font-size:15px}
+button{background:#111;color:#fff;border:0;cursor:pointer} button.secondary{background:#666} .exportBtn{background:#087f5b;font-weight:700}
+table{width:100%;border-collapse:collapse;margin-top:14px} th,td{padding:11px;border-bottom:1px solid #ddd;text-align:left} th{background:#f7f7f7}
+.login{max-width:420px;margin:70px auto} .error{color:#b42318;background:#fdecec;padding:10px;border-radius:8px;margin-top:12px}
+.badge{display:inline-block;padding:4px 8px;border-radius:20px;background:#eee;font-size:12px}
+.loginb{background:#e8f7ed} .logoutb{background:#eee} .small{color:#666;font-size:13px}
+@media(max-width:800px){.grid,.controls{grid-template-columns:1fr 1fr}table{font-size:13px;display:block;overflow:auto;white-space:nowrap}}
 
-<div id="login" class="card">
-<h2>HR Login</h2>
-<div class="row"><input id="email" type="email" placeholder="HR email">
-<input id="pass" type="password" placeholder="Password">
-<button onclick="login()">Login</button></div>
-<p id="msg" class="error"></p>
+.calendar-card{margin-top:18px}
+.calendar-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}
+.calendar-title{font-size:20px;font-weight:700}
+.calendar-legend{display:flex;gap:14px;flex-wrap:wrap;font-size:13px}
+.legend-item{display:flex;align-items:center;gap:6px}
+.legend-dot{width:12px;height:12px;border-radius:3px;border:1px solid #bbb}
+.leave-dot{background:#ffd6d6;border-color:#d33}
+.holiday-dot{background:#d8f5df;border-color:#198754}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);border:1px solid #ddd;border-radius:10px;overflow:hidden}
+.cal-dow,.cal-day{padding:9px;border-right:1px solid #eee;border-bottom:1px solid #eee;min-height:52px}
+.cal-dow{min-height:auto;background:#f7f7f7;font-weight:700;text-align:center}
+.cal-day{background:#fff;position:relative}
+.cal-day:nth-child(7n){border-right:0}
+.cal-day.muted{background:#fafafa;color:#aaa}
+.cal-day.leave{background:#ffd6d6;color:#9b1c1c;font-weight:700}
+.cal-day.holiday{background:#d8f5df;color:#146c2e;font-weight:700}
+.cal-day.leave.holiday{background:linear-gradient(135deg,#ffd6d6 50%,#d8f5df 50%)}
+.cal-label{display:block;font-size:11px;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media(max-width:800px){.cal-dow,.cal-day{padding:7px;min-height:45px;font-size:12px}}
+</style>
+</head>
+<body>
+<div id="loginView" class="login card">
+<h1>118 Attendance</h1>
+<h2>HR Dashboard</h2>
+<p>Sign in with your HR account to view employee attendance.</p>
+<label>Email</label>
+<input id="email" type="email" style="width:100%;margin:7px 0 12px" placeholder="HR email" autocomplete="username">
+<label>Password</label>
+<input id="password" type="password" style="width:100%;margin:7px 0 12px" placeholder="Password" autocomplete="current-password">
+<button style="width:100%" onclick="login()">Sign in as HR</button>
+<div id="loginMsg"></div>
 </div>
-
-<section id="app" class="hidden">
-<div class="card"><h2>Overview</h2><p id="userInfo" class="muted"></p>
-<div class="stat">Records<b id="total">0</b></div>
-<div class="stat">Logins<b id="logins">0</b></div>
-<div class="stat">Logouts<b id="logouts">0</b></div>
+<div id="app" style="display:none">
+<div class="wrap">
+<div class="card">
+<h1>HR Attendance Dashboard</h1>
+<div><span class="badge">HR</span> <span id="userEmail" class="small"></span>
+<button class="secondary" style="float:right" onclick="logout()">Sign out</button></div>
 </div>
-
-<div class="card"><h2>Attendance QR</h2>
-<p class="muted">Generate a 10-minute QR code for employees to scan.</p>
-<button onclick="createSession()">Generate New QR</button>
-<div id="qr"></div><p id="link" class="muted"></p>
+<div class="grid">
+<div class="stat">Total records<div id="total" class="num">0</div></div>
+<div class="stat">Logins<div id="logins" class="num">0</div></div>
+<div class="stat">Logouts<div id="logouts" class="num">0</div></div>
+<div class="stat">Employees today<div id="employees" class="num">0</div></div>
 </div>
-
-
-
-<div class="card"><h2>Attendance Records</h2>
-<div class="row"><label for="dateFilter"><b>Date:</b></label><input id="dateFilter" type="date" onchange="loadAttendance()"> <input id="search" placeholder="Search person" oninput="render()">
-<button onclick="loadAttendance()">Refresh</button><button onclick="exportCSV()">Export CSV</button></div>
-<div id="records"></div></div>
-</section></div>
-
+<div class="card calendar-card"><div id="attendanceCalendar"></div></div>
+<div class="card">
+<div class="controls">
+<input id="search" placeholder="Search name / employee ID / location">
+<select id="action"><option value="">All actions</option><option value="LOGIN">LOGIN</option><option value="LOGOUT">LOGOUT</option></select>
+<input id="from" type="date" title="From date">
+<input id="to" type="date" title="To date">
+<button class="exportBtn" onclick="exportCSV()">Export CSV</button><button onclick="loadData()">Refresh</button>
+</div>
+<div id="tableMsg" class="small" style="margin-top:12px"></div>
+<table>
+<thead><tr><th>Name</th><th>Employee ID</th><th>Location</th><th>Action</th><th>Login / Logout Time</th></tr></thead>
+<tbody id="rows"></tbody>
+</table>
+</div>
+</div>
+</div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script><script src="config.js"></script>
+<script src="config.js"></script><script src="calendar_config.js"></script>
 <script>
-const sb=supabase.createClient(window.SUPABASE_URL,window.SUPABASE_KEY);
-let rows=[], assignedPeople=[];
-document.addEventListener('DOMContentLoaded',()=>{ dateFilter.value=todayLocal(); });
+const sb = supabase.createClient(window.SUPABASE_URL, window.SUPABASE_KEY);
+let allRows = [];
 
-function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-function showLoggedIn(v){document.getElementById('login').classList.toggle('hidden',v);document.getElementById('app').classList.toggle('hidden',!v)}
-
-async function login(){
-  msg.textContent='';
-  const {data,error}=await sb.auth.signInWithPassword({email:email.value.trim(),password:pass.value});
-  if(error){msg.textContent=error.message;return}
-  const {data:p,error:e}=await sb.from('profiles').select('role').eq('id',data.user.id).single();
-  if(e || p?.role !== 'hr'){await sb.auth.signOut();msg.textContent='This account is not authorized for the HR portal.';return}
-  showLoggedIn(true); userInfo.textContent='Signed in as '+data.user.email+' • Role: '+p.role;
-  await loadAttendance();
-  
-}
-
-async function boot(){
-  const {data}=await sb.auth.getSession();
-  if(!data.session){showLoggedIn(false);return}
-  const {data:p}=await sb.from('profiles').select('role').eq('id',data.session.user.id).single();
-  if(!p || p.role!=='hr'){await sb.auth.signOut();showLoggedIn(false);return}
-  showLoggedIn(true);userInfo.textContent='Signed in as '+data.session.user.email+' • Role: '+p.role;
-  await loadAttendance();
-  
-}
-
-async function logout(){await sb.auth.signOut();location.reload()}
-
-async function createSession(){
-  const {data:auth}=await sb.auth.getSession();
-  if(!auth?.session){alert('Please log in again before generating the QR code.');return}
-  const token=(crypto.randomUUID?crypto.randomUUID():Date.now().toString(36)+Math.random().toString(36).slice(2))+Math.random().toString(36).slice(2,12);
-  const expires=new Date(Date.now()+10*60*1000).toISOString();
-  qr.innerHTML='<p class="muted">Creating QR code…</p>';
-  link.textContent='';
-  const {data,error}=await sb.from('attendance_sessions').insert({token,expires_at:expires,created_by:auth.session.user.id}).select('token').single();
-  if(error){qr.innerHTML='';alert('Could not create QR session: '+error.message);return}
-  const base=location.href.replace(/(?:hr|manager)\.html(?:\?.*)?$/,'');
-  const url=base+'mark.html?session='+encodeURIComponent(data.token);
-  qr.innerHTML='';
-  try{
-    new QRCode(document.getElementById('qr'),{text:url,width:300,height:300,correctLevel:QRCode.CorrectLevel.M});
-    link.innerHTML='<b>QR expires in 10 minutes.</b><br>'+esc(url);
-  }catch(e){
-    qr.innerHTML='<p class="error">QR generation failed: '+esc(e.message||e)+'</p>';
-    link.textContent=url;
+async function login() {
+  const email = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value;
+  const msg = document.getElementById('loginMsg');
+  msg.innerHTML = '';
+  if (!email || !password) {
+    msg.innerHTML = '<div class="error">Enter email and password.</div>';
+    return;
   }
+  const { error } = await sb.auth.signInWithPassword({ email, password });
+  if (error) {
+    msg.innerHTML = '<div class="error">' + esc(error.message) + '</div>';
+    return;
+  }
+  await start();
 }
 
-function todayLocal(){
-  const d=new Date();
-  const y=d.getFullYear(), m=String(d.getMonth()+1).padStart(2,'0'), day=String(d.getDate()).padStart(2,'0');
-  return `${y}-${m}-${day}`;
-}
-function selectedDate(){ return dateFilter.value || todayLocal(); }
-function dateBounds(dateStr){ const start=new Date(dateStr+'T00:00:00'); const end=new Date(start); end.setDate(end.getDate()+1); return {start:start.toISOString(),end:end.toISOString()}; }
-
-async function loadAttendance(){
-  const day=selectedDate();
-  const bounds=dateBounds(day);
-  const {data,error}=await sb.from('attendance')
-    .select('person_id,action,recorded_at,location,people(employee_id,name)')
-    .gte('recorded_at',bounds.start)
-    .lt('recorded_at',bounds.end)
-    .order('recorded_at',{ascending:false});
-  if(error){records.innerHTML='<p class="error">'+esc(error.message)+'</p>';return}
-  rows=data||[];render();
+async function start() {
+  const { data: { user } } = await sb.auth.getUser();
+  if (!user) return;
+  const { data: roleRow, error } = await sb.from('admin_roles').select('role').eq('user_id', user.id).maybeSingle();
+  if (error || !roleRow || roleRow.role !== 'HR') {
+    await sb.auth.signOut();
+    document.getElementById('loginMsg').innerHTML =
+      '<div class="error">This account is not authorized for the HR dashboard.</div>';
+    return;
+  }
+  document.getElementById('loginView').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  document.getElementById('userEmail').textContent = user.email || '';
+  loadData();
 }
 
-function render(){
-  const q=(search.value||'').toLowerCase();
-  const f=rows.filter(r=>(r.people?.name||'').toLowerCase().includes(q));
-  total.textContent=f.length;
-  logins.textContent=f.filter(r=>r.action==='LOGIN').length;
-  logouts.textContent=f.filter(r=>r.action==='LOGOUT').length;
-  records.innerHTML='<table><tr><th>Employee ID</th><th>Name</th><th>Location</th><th>Action</th><th>Time</th></tr>'+
-    f.map(r=>'<tr><td>'+esc(r.people?.employee_id||r.person_id)+'</td><td>'+esc(r.people?.name||'')+'</td><td>'+esc(r.location||'')+'</td><td>'+esc(r.action)+'</td><td>'+esc(new Date(r.recorded_at).toLocaleString())+'</td></tr>').join('')+'</table>';
+async function logout() {
+  await sb.auth.signOut();
+  location.reload();
 }
 
-function exportCSV(){
-  const q=(search.value||'').toLowerCase();
-  const f=rows.filter(r=>(r.people?.name||'').toLowerCase().includes(q));
-  if(!f.length){alert('No records for '+selectedDate());return}
-  const csv='Employee ID,Name,Location,Action,Date,Time\n'+f.map(r=>{
-    const d=new Date(r.recorded_at);
-    return [r.people?.employee_id||r.person_id,r.people?.name||'',r.location||'',r.action,selectedDate(),d.toLocaleTimeString()].map(x=>'\"'+String(x).replaceAll('\"','\"\"')+'\"').join(',');
-  }).join('\n');
-  const a=document.createElement('a');
-  a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
-  a.download='hr-attendance-' + selectedDate() + '.csv';
+async function loadData() {
+  const msg = document.getElementById('tableMsg');
+  msg.textContent = 'Loading...';
+  const { data, error } = await sb.from('attendance')
+    .select('employee_name,employee_id,location,action,recorded_at')
+    .order('recorded_at', { ascending: false })
+    .limit(5000);
+  if (error) {
+    msg.innerHTML = '<span class="error">' + esc(error.message) + '</span>';
+    return;
+  }
+  allRows = data || [];
+  render();
+}
+
+function render() {
+  const search = document.getElementById('search').value.trim().toLowerCase();
+  const action = document.getElementById('action').value;
+  const from = document.getElementById('from').value;
+  const to = document.getElementById('to').value;
+  const rows = allRows.filter(r => {
+    const text = (r.employee_name + ' ' + r.employee_id + ' ' + r.location).toLowerCase();
+    const date = (r.recorded_at || '').slice(0, 10);
+    return (!search || text.includes(search)) && (!action || r.action === action) &&
+           (!from || date >= from) && (!to || date <= to);
+  });
+  document.getElementById('total').textContent = rows.length;
+  document.getElementById('logins').textContent = rows.filter(r => r.action === 'LOGIN').length;
+  document.getElementById('logouts').textContent = rows.filter(r => r.action === 'LOGOUT').length;
+  const today = new Date().toISOString().slice(0, 10);
+  document.getElementById('employees').textContent =
+    new Set(allRows.filter(r => (r.recorded_at || '').slice(0, 10) === today).map(r => r.employee_id)).size;
+  document.getElementById('rows').innerHTML =
+    rows.map(r => `<tr><td>${esc(r.employee_name)}</td><td>${esc(r.employee_id)}</td>
+    <td>${esc(r.location)}</td><td><span class="badge ${r.action === 'LOGIN' ? 'loginb' : 'logoutb'}">${r.action}</span></td>
+    <td>${formatTime(r.recorded_at)}</td></tr>`).join('') ||
+    '<tr><td colspan="5">No records found.</td></tr>';
+  document.getElementById('tableMsg').textContent = rows.length + ' record(s)';
+}
+
+
+function exportCSV() {
+  const search = document.getElementById('search').value.trim().toLowerCase();
+  const action = document.getElementById('action').value;
+  const from = document.getElementById('from').value;
+  const to = document.getElementById('to').value;
+
+  const rows = allRows.filter(r => {
+    const text = (r.employee_name + ' ' + r.employee_id + ' ' + r.location).toLowerCase();
+    const date = (r.recorded_at || '').slice(0, 10);
+    return (!search || text.includes(search)) &&
+           (!action || r.action === action) &&
+           (!from || date >= from) &&
+           (!to || date <= to);
+  });
+
+  if (!rows.length) {
+    alert('No attendance records match the current filters.');
+    return;
+  }
+
+  const header = ['Employee Name','Employee ID','Location','Action','Login / Logout Time'];
+  const csvRows = [
+    header,
+    ...rows.map(r => [
+      r.employee_name ?? '',
+      r.employee_id ?? '',
+      r.location ?? '',
+      r.action ?? '',
+      r.recorded_at ? new Date(r.recorded_at).toLocaleString('en-IN') : ''
+    ])
+  ];
+
+  const csv = csvRows.map(row =>
+    row.map(value => '"' + String(value).replace(/"/g, '""') + '"').join(',')
+  ).join('\r\n');
+
+  const blob = new Blob(['\ufeff' + csv], {type: 'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+
+  const role = 'HR';
+  const date = new Date().toISOString().slice(0,10);
+  a.href = url;
+  a.download = '118attendance-' + role.toLowerCase() + '-' + date + '.csv';
+  document.body.appendChild(a);
   a.click();
-  URL.revokeObjectURL(a.href);
+  a.remove();
+  URL.revokeObjectURL(url);
 }
 
 
-boot();
-</script></body></html>
+function renderAttendanceCalendar() {
+  const root = document.getElementById('attendanceCalendar');
+  if (!root) return;
+
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth();
+  const first = new Date(year, month, 1);
+  const last = new Date(year, month + 1, 0);
+  const startDay = first.getDay();
+  const days = last.getDate();
+  const leaves = new Set(window.ATTENDANCE_LEAVES || []);
+  const holidayNames = new Map();
+  (window.ATTENDANCE_PUBLIC_HOLIDAYS || []).forEach(item => {
+    if (typeof item === 'string') holidayNames.set(item, '');
+    else if (item && item.date) holidayNames.set(item.date, item.name || '');
+  });
+  const holidays = new Set(holidayNames.keys());
+
+  let html = '<div class="calendar-head">' +
+    '<div class="calendar-title">' +
+      now.toLocaleString('en-IN', {month:'long', year:'numeric'}) +
+    '</div>' +
+    '<div class="calendar-legend">' +
+      '<span class="legend-item"><span class="legend-dot leave-dot"></span>Leave</span>' +
+      '<span class="legend-item"><span class="legend-dot holiday-dot"></span>Festival / Public Holiday</span>' +
+    '</div>' +
+  '</div><div class="cal-grid">';
+
+  ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].forEach(d => {
+    html += '<div class="cal-dow">' + d + '</div>';
+  });
+
+  for (let i=0; i<startDay; i++) html += '<div class="cal-day muted"></div>';
+
+  for (let day=1; day<=days; day++) {
+    const mm = String(month+1).padStart(2,'0');
+    const dd = String(day).padStart(2,'0');
+    const key = year + '-' + mm + '-' + dd;
+    const isLeave = leaves.has(key);
+    const isHoliday = holidays.has(key);
+    let cls = 'cal-day';
+    if (isLeave) cls += ' leave';
+    if (isHoliday) cls += ' holiday';
+
+    const festivalName = holidayNames.get(key) || '';
+    let label = '';
+    if (isLeave && isHoliday) label = 'Leave / ' + (festivalName || 'Holiday');
+    else if (isLeave) label = 'Leave';
+    else if (isHoliday) label = festivalName || 'Public Holiday';
+
+    html += '<div class="' + cls + '"><strong>' + day + '</strong>' +
+      (label ? '<span class="cal-label">' + label + '</span>' : '') +
+      '</div>';
+  }
+
+  const total = startDay + days;
+  const trailing = (7 - (total % 7)) % 7;
+  for (let i=0; i<trailing; i++) html += '<div class="cal-day muted"></div>';
+
+  html += '</div>';
+  root.innerHTML = html;
+}
+
+function formatTime(value) {
+  if (!value) return '';
+  return new Date(value).toLocaleString('en-IN', {dateStyle:'medium', timeStyle:'medium'});
+}
+function esc(value) {
+  return String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
+}
+['search','action','from','to'].forEach(id => document.getElementById(id).addEventListener('input', render));
+sb.auth.getSession().then(({data}) => { if (data.session) start(); });
+renderAttendanceCalendar();
+</script>
+</body>
+</html>

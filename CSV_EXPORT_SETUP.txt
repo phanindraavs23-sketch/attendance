@@ -1,0 +1,22 @@
+CSV EXPORT IS INCLUDED
+
+Replace BOTH files in the GitHub Pages published folder:
+- hr.html
+- manager.html
+
+Then hard refresh the browser with Ctrl+F5.
+
+HR:
+https://phanindraavs23-sketch.github.io/118attendance/hr.html
+
+Manager:
+https://phanindraavs23-sketch.github.io/118attendance/manager.html
+
+The green Export CSV button exports the records currently matching:
+- Search
+- Action
+- From date
+- To date
+
+CSV columns:
+Employee Name, Employee ID, Location, Action, Login / Logout Time

@@ -1,0 +1,38 @@
+LEAVE / INDIAN FESTIVAL HOLIDAY CALENDAR
+
+HR and Manager dashboards show a monthly calendar.
+
+RED   = Leave
+GREEN = Festival / Public Holiday
+
+Edit attendance/calendar_config.js:
+
+window.ATTENDANCE_LEAVES = [
+  '2026-09-18',
+  '2026-09-25'
+];
+
+window.ATTENDANCE_PUBLIC_HOLIDAYS = [
+  { date: '2026-01-26', name: 'Republic Day' },
+  { date: '2026-03-04', name: 'Holi' },
+  { date: '2026-11-08', name: 'Diwali' }
+  // ...etc
+];
+
+Public holidays support two formats (can be mixed):
+  - Plain date string, e.g. '2026-10-02'  -> shows generic "Public Holiday" label
+  - {date, name} object, e.g. {date:'2026-10-02', name:'Gandhi Jayanti'} -> shows the festival name on the calendar
+
+calendar_config.js already ships pre-filled with the official 2026 Indian
+gazetted festival/public holiday calendar (Republic Day, Holi, Id-ul-Fitr,
+Ram Navami, Mahavir Jayanti, Good Friday, Buddha Purnima, Id-ul-Zuha,
+Muharram, Independence Day, Milad-un-Nabi, Janmashtami, Gandhi Jayanti,
+Dussehra, Diwali, Guru Nanak's Birthday, Christmas Day). Add/remove/edit
+entries as needed for your organization or region.
+
+Use YYYY-MM-DD for all dates.
+Leave and a Festival/Public Holiday can both be placed on the same date;
+that date uses a split red/green background and the label shows both.
+
+No Supabase database change is required for this visual calendar.
+After changing calendar_config.js, upload it together with hr.html and manager.html.

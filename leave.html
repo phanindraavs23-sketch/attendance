@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>118 Attendance — Apply for Leave</title>
+<style>
+body{font-family:Arial,sans-serif;background:#f4f6f8;margin:0;color:#111}
+.wrap{max-width:620px;margin:25px auto;padding:16px}
+.card{background:#fff;padding:26px;border-radius:18px;box-shadow:0 4px 20px #0001}
+.muted{color:#555;line-height:1.5}
+.label{display:block;margin-top:14px;font-weight:bold}
+.field,button,textarea{width:100%;box-sizing:border-box;padding:14px;margin-top:7px;font-size:16px;border-radius:10px;font-family:inherit}
+.field,textarea{border:1px solid #aaa;background:#fff}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+button{border:0;background:#111;color:#fff;cursor:pointer;margin-top:18px}
+button:disabled{opacity:.55;cursor:not-allowed}
+.ok{background:#e8f7ed;padding:15px;border-radius:10px;margin-top:15px}
+.error{background:#fdecec;color:#b42318;padding:15px;border-radius:10px;margin-top:15px}
+.small{font-size:13px;color:#666}
+</style>
+</head>
+<body>
+<div class="wrap"><div class="card">
+<h1>Apply for Leave</h1>
+<p class="muted">Fill in your details and dates. Your manager will review and approve or reject the request.</p>
+
+<label class="label" for="employeeName">Employee Name</label>
+<input class="field" id="employeeName" placeholder="Enter employee name" autocomplete="name">
+
+<label class="label" for="employeeId">Employee ID</label>
+<input class="field" id="employeeId" placeholder="Enter Employee ID" autocomplete="off">
+
+<label class="label" for="employeeLocation">Location</label>
+<input class="field" id="employeeLocation" placeholder="Enter location (e.g. Office / Home)" autocomplete="off">
+
+<label class="label">Leave dates</label>
+<div class="row2">
+  <input class="field" id="startDate" type="date">
+  <input class="field" id="endDate" type="date">
+</div>
+
+<label class="label" for="reason">Reason</label>
+<textarea id="reason" rows="3" placeholder="Reason for leave"></textarea>
+
+<button id="submitBtn" onclick="submitLeave()">Submit request</button>
+<div id="msg"></div>
+</div></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script>
+const sb = supabase.createClient(window.SUPABASE_URL, window.SUPABASE_KEY);
+const msg = document.getElementById('msg');
+
+const params = new URLSearchParams(window.location.search);
+const qrName = params.get('name') || '';
+const qrEmployeeId = params.get('employeeId') || params.get('employee_id') || '';
+const qrLocation = params.get('location') || '';
+if (qrName) document.getElementById('employeeName').value = qrName;
+if (qrEmployeeId) document.getElementById('employeeId').value = qrEmployeeId;
+if (qrLocation) document.getElementById('employeeLocation').value = qrLocation;
+
+async function submitLeave() {
+  const employeeName = document.getElementById('employeeName').value.trim();
+  const employeeId = document.getElementById('employeeId').value.trim();
+  const location = document.getElementById('employeeLocation').value.trim();
+  const startDate = document.getElementById('startDate').value;
+  const endDate = document.getElementById('endDate').value;
+  const reason = document.getElementById('reason').value.trim();
+
+  if (!employeeName) return fail('Please enter your employee name.');
+  if (!employeeId) return fail('Please enter your Employee ID.');
+  if (!startDate || !endDate) return fail('Please select a start and end date.');
+  if (endDate < startDate) return fail('End date cannot be before start date.');
+  if (!reason) return fail('Please enter a reason for the leave.');
+
+  setBusy(true);
+  msg.innerHTML = '';
+
+  const { error } = await sb.from('leave_requests').insert({
+    employee_id: employeeId,
+    employee_name: employeeName,
+    location: location || null,
+    start_date: startDate,
+    end_date: endDate,
+    reason: reason
+  });
+
+  setBusy(false);
+  if (error) return fail(error.message);
+
+  msg.innerHTML = '<div class="ok"><b>Leave request submitted.</b><br>' +
+    esc(employeeName) + ' (' + esc(employeeId) + ')<br>' +
+    esc(startDate) + ' to ' + esc(endDate) + '<br>' +
+    '<span class="small">Your manager will approve or reject this request.</span></div>';
+}
+
+function setBusy(busy) {
+  document.getElementById('submitBtn').disabled = busy;
+}
+function fail(x) {
+  msg.innerHTML = '<div class="error">' + esc(x) + '</div>';
+}
+function esc(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  }[c]));
+}
+</script>
+</body>
+</html>

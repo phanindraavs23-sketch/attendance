@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>118 Attendance — HR & Manager Dashboard</title>
+<style>
+body{font-family:Arial,sans-serif;background:#f4f6f8;margin:0;color:#111}
+.wrap{max-width:1200px;margin:0 auto;padding:22px}
+.card{background:#fff;padding:20px;border-radius:16px;box-shadow:0 4px 20px #0001;margin-bottom:18px}
+h1{margin-top:0}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.stat{padding:18px;border:1px solid #ddd;border-radius:12px}.num{font-size:30px;font-weight:bold;margin-top:5px}
+.controls{display:grid;grid-template-columns:1fr 1fr 1fr 1fr auto;gap:10px}
+input,select,button{box-sizing:border-box;padding:11px;border:1px solid #aaa;border-radius:9px;font-size:15px}
+button{background:#111;color:#fff;border:0;cursor:pointer}button.secondary{background:#666}
+table{width:100%;border-collapse:collapse;margin-top:14px}th,td{padding:11px;border-bottom:1px solid #ddd;text-align:left}th{background:#f7f7f7}
+.login{max-width:420px;margin:70px auto}.error{color:#b42318;background:#fdecec;padding:10px;border-radius:8px}.ok{color:#137333}
+.badge{display:inline-block;padding:4px 8px;border-radius:20px;background:#eee;font-size:12px}.loginb{background:#e8f7ed}.logoutb{background:#eee}
+.small{color:#666;font-size:13px}
+@media(max-width:800px){.grid,.controls{grid-template-columns:1fr 1fr}table{font-size:13px;display:block;overflow:auto;white-space:nowrap}}
+</style>
+</head>
+<body>
+<div id="loginView" class="login card">
+<h1>Attendance Admin</h1>
+<p>HR and Manager dashboard</p>
+<label>Email</label><input id="email" type="email" style="width:100%;margin:7px 0 12px" placeholder="HR/Manager email">
+<label>Password</label><input id="password" type="password" style="width:100%;margin:7px 0 12px" placeholder="Password">
+<button style="width:100%" onclick="login()">Sign in</button>
+<div id="loginMsg"></div>
+<p class="small">Create HR/Manager accounts in Supabase Authentication, then assign their role using <b>admin_roles</b> in the SQL editor.</p>
+</div>
+
+<div id="app" style="display:none">
+<div class="wrap">
+<div class="card">
+<h1>118 Employee Attendance Dashboard</h1>
+<div><span id="roleBadge" class="badge"></span> <span id="userEmail" class="small"></span>
+<button class="secondary" style="float:right" onclick="logout()">Sign out</button></div>
+</div>
+<div class="grid">
+<div class="stat">Total records<div id="total" class="num">0</div></div>
+<div class="stat">Logins<div id="logins" class="num">0</div></div>
+<div class="stat">Logouts<div id="logouts" class="num">0</div></div>
+<div class="stat">Employees today<div id="employees" class="num">0</div></div>
+</div>
+<div class="card">
+<div class="controls">
+<input id="search" placeholder="Search name / employee ID / location">
+<select id="action"><option value="">All actions</option><option>LOGIN</option><option>LOGOUT</option></select>
+<input id="from" type="date"><input id="to" type="date">
+<button onclick="loadData()">Refresh</button>
+</div>
+<div id="tableMsg" class="small" style="margin-top:12px"></div>
+<table><thead><tr><th>Name</th><th>Employee ID</th><th>Location</th><th>Action</th><th>Login/Logout Time</th></tr></thead>
+<tbody id="rows"></tbody></table>
+</div>
+</div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script>
+const sb=supabase.createClient(window.SUPABASE_URL,window.SUPABASE_KEY);
+let allRows=[];
+async function login(){
+ const email=document.getElementById('email').value.trim(), password=document.getElementById('password').value;
+ const m=document.getElementById('loginMsg');m.innerHTML='';
+ if(!email||!password){m.innerHTML='<div class="error">Enter email and password.</div>';return}
+ const {error}=await sb.auth.signInWithPassword({email,password});
+ if(error){m.innerHTML='<div class="error">'+esc(error.message)+'</div>';return}
+ await start();
+}
+async function start(){
+ const {data:{user}}=await sb.auth.getUser();
+ if(!user)return;
+ const {data:role,error}=await sb.from('admin_roles').select('role').eq('user_id',user.id).maybeSingle();
+ if(error||!role||!['HR','MANAGER'].includes(role.role)){
+   await sb.auth.signOut(); document.getElementById('loginMsg').innerHTML='<div class="error">This account is not authorized for the HR/Manager dashboard.</div>';return;
+ }
+ document.getElementById('loginView').style.display='none';
+ document.getElementById('app').style.display='block';
+ document.getElementById('roleBadge').textContent=role.role;
+ document.getElementById('userEmail').textContent=user.email||'';
+ loadData();
+}
+async function logout(){await sb.auth.signOut();location.reload()}
+async function loadData(){
+ const msg=document.getElementById('tableMsg');msg.textContent='Loading...';
+ let q=sb.from('attendance').select('employee_name,employee_id,location,action,recorded_at').order('recorded_at',{ascending:false}).limit(5000);
+ const {data,error}=await q;
+ if(error){msg.innerHTML='<span class="error">'+esc(error.message)+'</span>';return}
+ allRows=data||[];render();
+}
+function render(){
+ const search=document.getElementById('search').value.trim().toLowerCase();
+ const action=document.getElementById('action').value;
+ const from=document.getElementById('from').value,to=document.getElementById('to').value;
+ const rows=allRows.filter(r=>{
+   const s=(r.employee_name+' '+r.employee_id+' '+r.location).toLowerCase();
+   const d=(r.recorded_at||'').slice(0,10);
+   return (!search||s.includes(search))&&(!action||r.action===action)&&(!from||d>=from)&&(!to||d<=to);
+ });
+ document.getElementById('total').textContent=rows.length;
+ document.getElementById('logins').textContent=rows.filter(r=>r.action==='LOGIN').length;
+ document.getElementById('logouts').textContent=rows.filter(r=>r.action==='LOGOUT').length;
+ const today=new Date().toISOString().slice(0,10);
+ document.getElementById('employees').textContent=new Set(allRows.filter(r=>(r.recorded_at||'').slice(0,10)===today).map(r=>r.employee_id)).size;
+ document.getElementById('rows').innerHTML=rows.map(r=>`<tr><td>${esc(r.employee_name)}</td><td>${esc(r.employee_id)}</td><td>${esc(r.location)}</td><td><span class="badge ${r.action==='LOGIN'?'loginb':'logoutb'}">${r.action}</span></td><td>${formatTime(r.recorded_at)}</td></tr>`).join('')||'<tr><td colspan="5">No records found.</td></tr>';
+ document.getElementById('tableMsg').textContent=rows.length+' record(s)';
+}
+function formatTime(x){if(!x)return '';return new Date(x).toLocaleString('en-IN',{dateStyle:'medium',timeStyle:'medium'})}
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+['search','action','from','to'].forEach(id=>document.getElementById(id).addEventListener('input',render));
+sb.auth.getSession().then(({data})=>{if(data.session)start()});
+</script>
+</body>
+</html>
