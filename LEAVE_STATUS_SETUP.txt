@@ -1,0 +1,21 @@
+118 ATTENDANCE — LEAVE STATUS PORTAL
+=====================================
+
+New page:
+  leave-status.html
+
+Employee flow:
+  Employee Portal -> Check Leave Status -> enter the same email used in the leave request
+  -> sees Pending / Approved / Rejected.
+
+IMPORTANT:
+1. Open Supabase SQL Editor.
+2. Run the complete supabase/leave_requests.sql file again.
+   This creates the get_leave_status(email) function used by the new page.
+3. The function is intentionally used instead of giving anonymous users direct
+   SELECT access to the leave_requests table.
+4. Email-only status checking is NOT strong authentication: anyone who knows an
+   employee's email could query that employee's status. For a production HR system,
+   add OTP/email verification before showing leave details.
+
+Existing HR/Manager approval pages are unchanged.

@@ -1,16 +1,16 @@
 118 Employee QR Attendance - GitHub Pages + Supabase
 
 GitHub Pages:
-https://phanindraavs23-sketch.github.io/attendance/
+https://phanindraavs23-sketch.github.io/118attendance/
 
 EMPLOYEE:
-https://phanindraavs23-sketch.github.io/attendance/
+https://phanindraavs23-sketch.github.io/118attendance/
 
 HR:
-https://phanindraavs23-sketch.github.io/attendance/hr.html
+https://phanindraavs23-sketch.github.io/118attendance/hr.html
 
 MANAGER:
-https://phanindraavs23-sketch.github.io/attendance/manager.html
+https://phanindraavs23-sketch.github.io/118attendance/manager.html
 
 The HR and Manager dashboards are separate HTML pages with separate role checks.
 HR users must have role HR in public.admin_roles.
@@ -46,3 +46,7 @@ The export uses the currently displayed filters (search, action, from date, to d
 CSV columns:
 Employee Name, Employee ID, Location, Action, Login / Logout Time
 The file downloads directly in the browser and does not require a server.
+
+
+EMAIL NOTIFICATIONS:
+See EMAIL_SETUP.txt. Leave requests now collect employee_email and the Manager approve/reject action invokes the secure send-leave-decision-email Supabase Edge Function.

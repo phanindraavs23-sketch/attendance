@@ -36,30 +36,15 @@ STEP 5 — Test
 5. Click Approve or Reject.
 6. The employee receives the decision email.
 
-STEP 6 — Make it fire on every status change, everywhere (recommended)
-Instead of the Manager dashboard calling the Edge Function directly (which
-only covers approvals made in that one page), a database trigger now sends
-the email automatically whenever a leave_requests row's status changes to
-APPROVED or REJECTED — whether that happens in the Manager dashboard, a
-future HR approval screen, the Supabase SQL editor, or any other tool.
-
-1. Generate a random secret, e.g.: openssl rand -hex 32
-2. Set it on the Edge Function:
-     supabase secrets set LEAVE_WEBHOOK_SECRET=<the random string>
-3. Open supabase/leave_decision_email_trigger.sql and replace:
-     <YOUR_SUPABASE_PROJECT_URL>   with your project URL (https://xxxx.supabase.co)
-     <YOUR_LEAVE_WEBHOOK_SECRET>   with the SAME random string from step 1
-4. Run the edited file in the Supabase SQL editor.
-5. Test by changing a request's status directly in the SQL editor — the
-   employee should receive the email with no browser involved.
-
-The Manager dashboard no longer calls the Edge Function itself (manager.html
-just updates the row); the trigger is now the single source of these emails,
-so employees are never emailed twice for one decision.
-
 IMPORTANT
 - The database decision is saved even if the email provider fails.
-- The trigger call is fire-and-forget (async via pg_net), so a slow or
-  failing email provider never blocks or fails the status update itself.
-- Check Database > Webhooks/Logs or the pg_net response tables in Supabase
-  if an email doesn't arrive, to see the HTTP status the Edge Function returned.
+- The Manager dashboard shows an email error message if the email call fails.
+- For automatic emails even when a decision is made outside the browser, a Supabase Database Webhook/Edge Function trigger can be added later.
+
+
+USER-INPUT EMAIL FLOW
+- Employee enters their email on leave.html.
+- The email is saved in leave_requests.employee_email.
+- Manager can enter/confirm the employee email before clicking Approve or Reject.
+- The manager action updates the leave status and calls send-leave-decision-email.
+- The Edge Function sends APPROVED or REJECTED to that exact email.
