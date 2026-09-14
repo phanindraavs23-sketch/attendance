@@ -1,0 +1,15 @@
+118 Attendance — Employee ID Leave Portal
+
+Employee-facing leave pages use Employee ID only. No employee email field is required.
+
+Pages:
+- leave.html: Apply for Leave using Employee ID
+- leave-status.html: Employee Leave Portal using Employee ID
+- leave-status.js: loads leave status by Employee ID
+
+Supabase:
+1. Open SQL Editor.
+2. Run supabase/leave_requests.sql.
+3. This SQL drops an older get_leave_status(text) function first to avoid PostgreSQL error 42P13.
+
+After deploying, hard refresh the browser with Ctrl+F5 if an old email field still appears.

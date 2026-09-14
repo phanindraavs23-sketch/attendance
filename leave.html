@@ -2,20 +2,19 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>118 Attendance — Apply for Leave</title>
+<title>118 Attendance — Apply for Leave (Employee ID)</title>
 <style>
 :root{--bg:#f5f7fb;--ink:#172033;--muted:#64748b;--line:#e2e8f0;--blue:#2563eb;--purple:#7c3aed}
-*{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,-apple-system,"Segoe UI",Arial,sans-serif;background:radial-gradient(circle at 10% 0%,#dbeafe,transparent 32%),radial-gradient(circle at 100% 0%,#ede9fe,transparent 30%),var(--bg);color:var(--ink)}.wrap{max-width:720px;margin:0 auto;padding:30px 18px 50px}.back{display:inline-flex;text-decoration:none;color:#475569;font-size:14px;margin-bottom:20px}.card{background:#fff;border:1px solid #fff;border-radius:26px;box-shadow:0 24px 70px #1e293b14;overflow:hidden}.head{padding:32px;background:linear-gradient(135deg,#eff6ff,#f5f3ff)}.logo{width:46px;height:46px;border-radius:14px;background:linear-gradient(135deg,var(--blue),var(--purple));color:#fff;display:grid;place-items:center;font-weight:800;margin-bottom:20px}.head h1{margin:0 0 8px;font-size:30px;letter-spacing:-.03em}.head p{margin:0;color:var(--muted);line-height:1.6}.form{padding:30px}.label{display:block;margin:17px 0 7px;font-size:13px;font-weight:800;color:#334155}.field,textarea,button{width:100%;font:inherit}.field,textarea{padding:13px 14px;border:1px solid #cbd5e1;border-radius:12px;outline:none;background:#fff}.field:focus,textarea:focus{border-color:#60a5fa;box-shadow:0 0 0 4px #3b82f61a}.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}.email-note{font-size:12px;color:#64748b;margin-top:7px}.submit{margin-top:23px;padding:14px;border:0;border-radius:13px;background:linear-gradient(135deg,var(--blue),var(--purple));color:#fff;font-weight:800;cursor:pointer;box-shadow:0 12px 25px #2563eb30}.submit:disabled{opacity:.55}.ok,.error{padding:14px;border-radius:13px;margin-top:16px}.ok{background:#ecfdf5;color:#065f46;border:1px solid #a7f3d0}.error{background:#fef2f2;color:#991b1b;border:1px solid #fecaca}.small{font-size:12px;color:#64748b}@media(max-width:600px){.row2{grid-template-columns:1fr}.head,.form{padding:23px}}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,-apple-system,"Segoe UI",Arial,sans-serif;background:radial-gradient(circle at 10% 0%,#dbeafe,transparent 32%),radial-gradient(circle at 100% 0%,#ede9fe,transparent 30%),var(--bg);color:var(--ink)}.wrap{max-width:720px;margin:0 auto;padding:30px 18px 50px}.back{display:inline-flex;text-decoration:none;color:#475569;font-size:14px;margin-bottom:20px}.card{background:#fff;border:1px solid #fff;border-radius:26px;box-shadow:0 24px 70px #1e293b14;overflow:hidden}.head{padding:32px;background:linear-gradient(135deg,#eff6ff,#f5f3ff)}.logo{width:46px;height:46px;border-radius:14px;background:linear-gradient(135deg,var(--blue),var(--purple));color:#fff;display:grid;place-items:center;font-weight:800;margin-bottom:20px}.head h1{margin:0 0 8px;font-size:30px;letter-spacing:-.03em}.head p{margin:0;color:var(--muted);line-height:1.6}.form{padding:30px}.label{display:block;margin:17px 0 7px;font-size:13px;font-weight:800;color:#334155}.field,textarea,button{width:100%;font:inherit}.field,textarea{padding:13px 14px;border:1px solid #cbd5e1;border-radius:12px;outline:none;background:#fff}.field:focus,textarea:focus{border-color:#60a5fa;box-shadow:0 0 0 4px #3b82f61a}.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}.submit{margin-top:23px;padding:14px;border:0;border-radius:13px;background:linear-gradient(135deg,var(--blue),var(--purple));color:#fff;font-weight:800;cursor:pointer;box-shadow:0 12px 25px #2563eb30}.submit:disabled{opacity:.55}.ok,.error{padding:14px;border-radius:13px;margin-top:16px}.ok{background:#ecfdf5;color:#065f46;border:1px solid #a7f3d0}.error{background:#fef2f2;color:#991b1b;border:1px solid #fecaca}.small{font-size:12px;color:#64748b}@media(max-width:600px){.row2{grid-template-columns:1fr}.head,.form{padding:23px}}
 </style>
 </head>
 <body><div class="wrap">
 <a class="back" href="portal.html">← Back to portal</a>
 <div class="card">
-<div class="head"><div class="logo">118</div><h1>Apply for Leave</h1><p>Send your request to your manager. You will receive an email when the request is approved or rejected.</p></div>
+<div class="head"><div class="logo">118</div><h1>Apply for Leave</h1><p>Submit your leave request using your Employee ID. No employee email is required.</p></div>
 <div class="form">
 <label class="label" for="employeeName">Employee Name</label><input class="field" id="employeeName" placeholder="Enter your full name" autocomplete="name">
 <label class="label" for="employeeId">Employee ID</label><input class="field" id="employeeId" placeholder="Enter Employee ID">
-<label class="label" for="employeeEmail">Company Email</label><input class="field" id="employeeEmail" type="email" placeholder="you@company.com" autocomplete="email"><div class="email-note">Decision notifications will be sent to this address.</div>
 <label class="label" for="employeeLocation">Location</label><input class="field" id="employeeLocation" placeholder="Office / Home / Site">
 <label class="label">Leave dates</label><div class="row2"><input class="field" id="startDate" type="date"><input class="field" id="endDate" type="date"></div>
 <label class="label" for="reason">Reason</label><textarea id="reason" rows="4" placeholder="Reason for leave"></textarea>
@@ -25,17 +24,16 @@
 <script>
 const sb=supabase.createClient(window.SUPABASE_URL,window.SUPABASE_KEY),msg=document.getElementById('msg');
 const params=new URLSearchParams(location.search);
-const qrName=params.get('name')||'',qrEmployeeId=params.get('employeeId')||params.get('employee_id')||'',qrLocation=params.get('location')||'',qrEmail=params.get('email')||'';
-if(qrName) employeeName.value=qrName;if(qrEmployeeId) employeeId.value=qrEmployeeId;if(qrLocation) employeeLocation.value=qrLocation;if(qrEmail) employeeEmail.value=qrEmail;
+const qrName=params.get('name')||'',qrEmployeeId=params.get('employeeId')||params.get('employee_id')||'',qrLocation=params.get('location')||'';
+if(qrName) employeeName.value=qrName;if(qrEmployeeId) employeeId.value=qrEmployeeId;if(qrLocation) employeeLocation.value=qrLocation;
 async function submitLeave(){
- const employee_name=employeeName.value.trim(),employee_id=employeeId.value.trim(),employee_email=employeeEmail.value.trim(),location=employeeLocation.value.trim(),start_date=startDate.value,end_date=endDate.value,reason=document.getElementById('reason').value.trim();
+ const employee_name=employeeName.value.trim(),employee_id=employeeId.value.trim(),location=employeeLocation.value.trim(),start_date=startDate.value,end_date=endDate.value,reason=document.getElementById('reason').value.trim();
  if(!employee_name)return fail('Please enter your employee name.');if(!employee_id)return fail('Please enter your Employee ID.');
- if(!employee_email||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(employee_email))return fail('Please enter a valid company email.');
  if(!start_date||!end_date)return fail('Please select a start and end date.');if(end_date<start_date)return fail('End date cannot be before start date.');if(!reason)return fail('Please enter a reason.');
  setBusy(true);msg.innerHTML='';
- const {error}=await sb.from('leave_requests').insert({employee_id,employee_name,employee_email,location:location||null,start_date,end_date,reason});
+ const {error}=await sb.from('leave_requests').insert({employee_id,employee_name,location:location||null,start_date,end_date,reason});
  setBusy(false);if(error)return fail(error.message);
- msg.innerHTML='<div class="ok"><b>Leave request submitted successfully.</b><br>'+esc(employee_name)+' ('+esc(employee_id)+')<br>'+esc(start_date)+' to '+esc(end_date)+'<br><span class="small">Approval/rejection notifications will be sent to '+esc(employee_email)+'.</span></div>';
+ msg.innerHTML='<div class="ok"><b>Leave request submitted successfully.</b><br>'+esc(employee_name)+' ('+esc(employee_id)+')<br>'+esc(start_date)+' to '+esc(end_date)+'<br><span class="small">Use the Leave Status portal with your Employee ID to check the decision.</span></div>';
 }
 function setBusy(v){document.getElementById('submitBtn').disabled=v}function fail(x){msg.innerHTML='<div class="error">'+esc(x)+'</div>'}
 function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}

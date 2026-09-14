@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>118 Attendance — Leave Status</title>
+<title>118 Attendance — Employee ID Leave Portal</title>
 <style>
 :root{--bg:#f5f7fb;--ink:#172033;--muted:#64748b;--line:#e2e8f0;--blue:#2563eb;--purple:#7c3aed}
 *{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,-apple-system,"Segoe UI",Arial,sans-serif;background:radial-gradient(circle at 10% 0%,#dbeafe,transparent 32%),radial-gradient(circle at 100% 0%,#ede9fe,transparent 30%),var(--bg);color:var(--ink)}.wrap{max-width:900px;margin:0 auto;padding:30px 18px 50px}.back{display:inline-flex;text-decoration:none;color:#475569;font-size:14px;margin-bottom:20px}.card{background:#fff;border:1px solid #fff;border-radius:26px;box-shadow:0 24px 70px #1e293b14;overflow:hidden}.head{padding:32px;background:linear-gradient(135deg,#eff6ff,#f5f3ff)}.logo{width:46px;height:46px;border-radius:14px;background:linear-gradient(135deg,var(--blue),var(--purple));color:#fff;display:grid;place-items:center;font-weight:800;margin-bottom:20px}.head h1{margin:0 0 8px;font-size:30px}.head p{margin:0;color:var(--muted);line-height:1.6}.form{padding:28px}.label{display:block;margin:0 0 7px;font-size:13px;font-weight:800;color:#334155}.row{display:grid;grid-template-columns:1fr 180px;gap:12px}.field,button{width:100%;font:inherit;padding:14px;border-radius:12px}.field{border:1px solid #cbd5e1;outline:none}.field:focus{border-color:#60a5fa;box-shadow:0 0 0 4px #3b82f61a}.btn{border:0;background:linear-gradient(135deg,var(--blue),var(--purple));color:#fff;font-weight:800;cursor:pointer}.btn:disabled{opacity:.55}.msg{margin-top:16px}.error,.empty{padding:14px;border-radius:13px}.error{background:#fef2f2;color:#991b1b;border:1px solid #fecaca}.empty{background:#f8fafc;color:#475569}.table-wrap{overflow:auto;margin-top:20px}.table{width:100%;border-collapse:collapse;min-width:700px}.table th,.table td{padding:13px 12px;border-bottom:1px solid var(--line);text-align:left;font-size:13px;vertical-align:top}.table th{color:#475569;background:#f8fafc}.badge{display:inline-block;padding:6px 9px;border-radius:999px;font-weight:800;font-size:11px}.pending{background:#fff7ed;color:#9a3412}.approved{background:#ecfdf5;color:#047857}.rejected{background:#fef2f2;color:#b91c1c}.small{font-size:12px;color:#64748b}@media(max-width:650px){.row{grid-template-columns:1fr}.head,.form{padding:23px}}
@@ -11,15 +11,11 @@
 <body><div class="wrap">
 <a class="back" href="portal.html">← Back to portal</a>
 <div class="card">
-<div class="head"><div class="logo">118</div><h1>Leave Status</h1><p>Enter your Employee ID to view your own leave requests and see whether each request is pending, approved, or rejected.</p></div>
+<div class="head"><div class="logo">118</div><h1>Employee Leave Portal</h1><p>Login with your Employee ID to view your leave requests and see whether each request is pending, approved, or rejected.</p></div>
 <div class="form">
 <label class="label" for="employeeId">Employee ID</label>
 <div class="row"><input class="field" id="employeeId" placeholder="e.g. EMP001" autocomplete="off"><button class="btn" id="checkBtn" onclick="checkStatus()">Check Leave Status</button></div>
 <div id="msg" class="msg"></div><div id="results"></div>
 </div></div></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config.js"></script>
-<script>
-const sb=supabase.createClient(window.SUPABASE_URL,window.SUPABASE_KEY);const idInput=document.getElementById('employeeId'),msg=document.getElementById('msg'),results=document.getElementById('results');
-async function checkStatus(){const id=idInput.value.trim();if(!id){msg.innerHTML='<div class="error">Please enter your Employee ID.</div>';results.innerHTML='';return}document.getElementById('checkBtn').disabled=true;msg.textContent='Checking...';results.innerHTML='';const {data,error}=await sb.rpc('get_leave_status',{p_employee_id:id});document.getElementById('checkBtn').disabled=false;if(error){msg.innerHTML='<div class="error">'+esc(error.message)+'</div>';return}if(!data||!data.length){msg.innerHTML='<div class="empty">No leave requests found for Employee ID <b>'+esc(id)+'</b>.</div>';return}msg.innerHTML='<div class="small">Showing '+data.length+' leave request(s) for Employee ID <b>'+esc(id.toUpperCase())+'</b>.</div>';results.innerHTML='<div class="table-wrap"><table class="table"><thead><tr><th>Dates</th><th>Reason</th><th>Status</th><th>Manager / HR Note</th><th>Decision Date</th></tr></thead><tbody>'+data.map(r=>{const c=r.status==='APPROVED'?'approved':r.status==='REJECTED'?'rejected':'pending';return '<tr><td><b>'+esc(r.start_date)+'</b> to <b>'+esc(r.end_date)+'</b></td><td>'+esc(r.reason)+'</td><td><span class="badge '+c+'">'+esc(r.status)+'</span></td><td>'+esc(r.manager_note||'—')+'</td><td>'+esc(r.decided_at?new Date(r.decided_at).toLocaleString('en-IN'):'Pending')+'</td></tr>'}).join('')+'</tbody></table></div>'}
-function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}idInput.addEventListener('keydown',e=>{if(e.key==='Enter')checkStatus()});
-</script></body></html>
+<script src="leave-status.js"></script></body></html>

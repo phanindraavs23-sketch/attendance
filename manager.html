@@ -86,7 +86,7 @@ table{width:100%;border-collapse:collapse;margin-top:14px} th,td{padding:11px;bo
 </div>
 <div id="leaveMsg" class="small" style="margin-bottom:8px"></div>
 <table>
-<thead><tr><th>Name</th><th>Employee ID</th><th>Email</th><th>Dates</th><th>Reason</th><th>Status</th><th>Requested</th><th>Actions</th></tr></thead>
+<thead><tr><th>Name</th><th>Employee ID</th><th>Dates</th><th>Reason</th><th>Status</th><th>Requested</th><th>Actions</th></tr></thead>
 <tbody id="leaveRows"></tbody>
 </table>
 </div>
@@ -106,7 +106,7 @@ table{width:100%;border-collapse:collapse;margin-top:14px} th,td{padding:11px;bo
 </div>
 </div>
 </div>
-<div id="decisionEmailWrap" style="display:none"></div><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script><script src="calendar_config.js"></script>
 <script>
 const sb = supabase.createClient(window.SUPABASE_URL, window.SUPABASE_KEY);
@@ -259,7 +259,7 @@ async function loadLeaveRequests() {
   const msg = document.getElementById('leaveMsg');
   msg.textContent = 'Loading...';
   const { data, error } = await sb.from('leave_requests')
-    .select('id,employee_name,employee_id,employee_email,location,start_date,end_date,reason,status,requested_at,decided_by,manager_note')
+    .select('id,employee_name,employee_id,location,start_date,end_date,reason,status,requested_at,decided_by,manager_note')
     .order('requested_at', { ascending: false })
     .limit(2000);
   if (error) {
@@ -283,7 +283,7 @@ function renderLeaveRequests() {
         '<button class="rejectBtn" onclick="decideLeave(' + r.id + ',\'REJECTED\')">Reject</button>' +
         '</div>'
       : '<span class="small">' + (r.decided_by ? 'by ' + esc(r.decided_by) : '') + '</span>';
-    return '<tr><td>' + esc(r.employee_name) + '</td><td>' + esc(r.employee_id) + '</td><td>' + esc(r.employee_email || '—') + '</td>' +
+    return '<tr><td>' + esc(r.employee_name) + '</td><td>' + esc(r.employee_id) + '</td>' +
       '<td>' + esc(r.start_date) + ' to ' + esc(r.end_date) + '</td>' +
       '<td>' + esc(r.reason) + '</td>' +
       '<td><span class="badge ' + badgeClass + '">' + r.status + '</span></td>' +
@@ -305,19 +305,7 @@ async function decideLeave(id, status) {
     document.getElementById('leaveMsg').innerHTML = '<span class="error">' + esc(error.message) + '</span>';
     return;
   }
-  // Send the decision email securely through the Supabase Edge Function.
-  const typedEmail = (document.getElementById('decisionEmail')?.value || '').trim();
-  if (!typedEmail) {
-    document.getElementById('leaveMsg').innerHTML = '<span class="error">Enter the employee email before approving or rejecting.</span>';
-    return;
-  }
-  const emailResult = await sb.functions.invoke('send-leave-decision-email', {
-    body: { leave_request_id: id, employee_email: (document.getElementById('decisionEmail')?.value || '').trim() }
-  });
-  if (emailResult.error) {
-    document.getElementById('leaveMsg').innerHTML =
-      '<span class="error">Decision saved, but the email could not be sent. Check the email Edge Function setup.</span>';
-  }
+  document.getElementById('leaveMsg').innerHTML = '<span class="ok">Leave ' + status.toLowerCase() + ' successfully. Employee can check the result using Employee ID.</span>';
   await loadLeaveRequests();
 }
 
