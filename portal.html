@@ -11,8 +11,129 @@
 .hero{display:grid;grid-template-columns:1.25fr .75fr;gap:22px;margin-bottom:24px}.hero-main,.hero-side{background:#ffffffd9;border:1px solid #fff;border-radius:28px;box-shadow:0 22px 60px #1e293b14;backdrop-filter:blur(10px)}.hero-main{padding:38px}.eyebrow{color:var(--brand);font-weight:800;font-size:12px;letter-spacing:.12em;text-transform:uppercase}.hero h2{font-size:clamp(32px,5vw,54px);line-height:1.02;letter-spacing:-.045em;margin:12px 0 15px}.hero h2 span{background:linear-gradient(90deg,var(--brand),var(--brand2));-webkit-background-clip:text;background-clip:text;color:transparent}.hero p{color:var(--muted);line-height:1.7;max-width:650px;margin:0 0 25px}.cta{display:inline-flex;align-items:center;gap:9px;padding:13px 17px;border-radius:13px;background:var(--brand);color:#fff;text-decoration:none;font-weight:700;box-shadow:0 12px 24px #2563eb33}.hero-side{padding:28px;display:flex;flex-direction:column;justify-content:space-between}.status{padding:15px;border-radius:16px;background:#ecfdf5;border:1px solid #a7f3d0}.status b{color:#047857}.mini{color:var(--muted);font-size:13px;line-height:1.6}.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}.card{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:24px;text-decoration:none;color:inherit;box-shadow:0 12px 35px #1e293b0b;transition:.2s}.card:hover{transform:translateY(-4px);box-shadow:0 18px 42px #1e293b18}.icon{width:44px;height:44px;border-radius:13px;background:#eff6ff;color:var(--brand);display:grid;place-items:center;font-size:21px;margin-bottom:17px}.card:nth-child(2) .icon{background:#f5f3ff;color:#7c3aed}.card:nth-child(3) .icon{background:#ecfdf5;color:#059669}.card h3{margin:0 0 7px;font-size:18px}.card p{margin:0;color:var(--muted);font-size:14px;line-height:1.6}.arrow{float:right;color:#94a3b8;font-size:22px}.admin{margin-top:18px;display:grid;grid-template-columns:1fr 1fr;gap:18px}.admin .card:nth-child(1) .icon{background:#fff7ed;color:#ea580c}.admin .card:nth-child(2) .icon{background:#fdf2f8;color:#db2777}footer{text-align:center;color:#94a3b8;font-size:12px;margin-top:34px}
 @media(max-width:760px){.hero{grid-template-columns:1fr}.cards,.admin{grid-template-columns:1fr}.top{align-items:flex-start}.hero-main{padding:27px}.container{padding-top:22px}}
 </style>
+<style>
+/* ===== 118 Attendance Portal — unified premium UI ===== */
+:root{
+  --p-bg:#f4f7fb;
+  --p-surface:rgba(255,255,255,.92);
+  --p-ink:#122033;
+  --p-muted:#64748b;
+  --p-line:#e2e8f0;
+  --p-brand:#2563eb;
+  --p-brand2:#7c3aed;
+  --p-success:#059669;
+  --p-danger:#dc2626;
+  --p-shadow:0 18px 55px rgba(15,23,42,.09);
+}
+html{scroll-behavior:smooth}
+body{
+  font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif !important;
+  background:
+    radial-gradient(circle at 8% -5%,rgba(59,130,246,.18),transparent 28%),
+    radial-gradient(circle at 96% 2%,rgba(124,58,237,.14),transparent 27%),
+    linear-gradient(180deg,#f8fbff 0%,var(--p-bg) 100%) !important;
+  color:var(--p-ink) !important;
+}
+.portal-nav{
+  position:sticky;top:0;z-index:1000;
+  width:100%;
+  display:flex;align-items:center;gap:12px;
+  padding:12px max(18px,calc((100% - 1240px)/2));
+  background:rgba(255,255,255,.82);
+  border-bottom:1px solid rgba(226,232,240,.9);
+  backdrop-filter:blur(18px);
+  box-shadow:0 8px 30px rgba(15,23,42,.05);
+}
+.portal-brand{
+  display:flex;align-items:center;gap:10px;
+  color:var(--p-ink);text-decoration:none;font-weight:850;
+  margin-right:10px;white-space:nowrap;
+}
+.portal-logo{
+  width:38px;height:38px;border-radius:12px;
+  display:grid;place-items:center;color:white;font-size:12px;font-weight:900;
+  background:linear-gradient(135deg,var(--p-brand),var(--p-brand2));
+  box-shadow:0 8px 20px rgba(37,99,235,.25);
+}
+.portal-links{
+  display:flex;align-items:center;gap:4px;overflow-x:auto;
+  scrollbar-width:none;flex:1;
+}
+.portal-links::-webkit-scrollbar{display:none}
+.portal-links a{
+  color:#475569;text-decoration:none;font-size:13px;font-weight:700;
+  padding:9px 11px;border-radius:10px;white-space:nowrap;
+  transition:.18s ease;
+}
+.portal-links a:hover{background:#eff6ff;color:var(--p-brand)}
+.portal-links a.active{background:#eef2ff;color:#4f46e5}
+.portal-secure{
+  font-size:11px;font-weight:800;color:#047857;
+  background:#ecfdf5;border:1px solid #bbf7d0;
+  border-radius:999px;padding:7px 10px;white-space:nowrap;
+}
+body > .wrap, body > .container{position:relative}
+.card{
+  border-color:rgba(226,232,240,.9) !important;
+  box-shadow:var(--p-shadow) !important;
+}
+input,select,textarea,.field{
+  transition:border-color .18s,box-shadow .18s,transform .18s;
+}
+input:focus,select:focus,textarea:focus,.field:focus{
+  border-color:#60a5fa !important;
+  box-shadow:0 0 0 4px rgba(59,130,246,.10) !important;
+  outline:none;
+}
+button{
+  transition:transform .18s,box-shadow .18s,opacity .18s !important;
+}
+button:not(:disabled):hover{
+  transform:translateY(-1px);
+  box-shadow:0 8px 18px rgba(15,23,42,.14);
+}
+table{border-collapse:separate !important;border-spacing:0 !important;overflow:hidden;border:1px solid var(--p-line);border-radius:14px}
+th{
+  background:linear-gradient(180deg,#f8fafc,#f1f5f9) !important;
+  color:#475569;font-size:12px;text-transform:uppercase;letter-spacing:.04em;
+}
+th,td{border-bottom:1px solid var(--p-line) !important}
+tr:last-child td{border-bottom:0 !important}
+.badge{font-weight:800}
+@media(max-width:760px){
+  .portal-nav{padding:10px 12px;gap:8px}
+  .portal-brand span:last-child{display:none}
+  .portal-secure{display:none}
+}
+</style>
+<script src="portal-roles.js"></script>
 </head>
 <body>
+
+<nav class="portal-nav" aria-label="Main portal navigation">
+  <a class="portal-brand" href="portal.html" aria-label="118 Attendance home">
+    <span class="portal-logo">118</span><span>118 Attendance</span>
+  </a>
+  <div class="portal-links">
+    <a href="portal.html">Portal</a>
+    <a href="attendance.html">Attendance</a>
+    <a href="leave.html">Apply Leave</a>
+    <a href="leave-status.html">Leave Status</a>
+    <a href="manager.html">Manager</a>
+    <a href="hr.html">HR</a>
+  </div>
+  <span class="portal-secure">● Secure Portal</span>
+</nav>
+<script>
+(function(){
+  const page=(location.pathname.split('/').pop()||'portal.html').toLowerCase();
+  document.querySelectorAll('.portal-links a').forEach(a=>{
+    const target=a.getAttribute('href').toLowerCase();
+    if(target===page || (page==='index.html' && target==='portal.html')) a.classList.add('active');
+  });
+})();
+</script>
+
 <div class="container">
   <div class="top">
     <div class="brand"><div class="logo">118</div><div><h1>118 Attendance</h1><p>Employee attendance & leave management</p></div></div>

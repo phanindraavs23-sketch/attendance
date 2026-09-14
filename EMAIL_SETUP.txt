@@ -1,0 +1,50 @@
+LEAVE EMAIL NOTIFICATION SETUP
+
+This version adds:
+1. Employee email field on the leave form.
+2. Manager approve/reject sends a notification email.
+3. HR/Manager authorization is checked inside the Edge Function.
+4. Resend is used as the email provider so the Resend API key is NOT exposed in GitHub Pages.
+
+STEP 1 — Update Supabase database
+Run:
+  supabase/leave_requests.sql
+
+If your existing leave_requests table already has rows, the new employee_email column may contain NULLs.
+Populate those old rows before enforcing NOT NULL.
+
+STEP 2 — Create a Resend account/domain
+Create a verified sending domain/address in Resend.
+Keep the Resend API key private.
+
+STEP 3 — Deploy the Edge Function
+From your Supabase project directory:
+  supabase functions deploy send-leave-decision-email
+
+STEP 4 — Set Edge Function secrets
+Set these secrets in Supabase:
+  RESEND_API_KEY = your Resend API key
+  LEAVE_FROM_EMAIL = 118 Attendance <notifications@your-verified-domain.com>
+
+SUPABASE_URL, SUPABASE_ANON_KEY and SUPABASE_SERVICE_ROLE_KEY are available to Supabase Edge Functions automatically in a normal project deployment. Do NOT place the service-role key in config.js or any browser HTML.
+
+STEP 5 — Test
+1. Open leave.html.
+2. Enter employee name, ID and company email.
+3. Submit a leave request.
+4. Sign in to manager.html.
+5. Click Approve or Reject.
+6. The employee receives the decision email.
+
+IMPORTANT
+- The database decision is saved even if the email provider fails.
+- The Manager dashboard shows an email error message if the email call fails.
+- For automatic emails even when a decision is made outside the browser, a Supabase Database Webhook/Edge Function trigger can be added later.
+
+
+USER-INPUT EMAIL FLOW
+- Employee enters their email on leave.html.
+- The email is saved in leave_requests.employee_email.
+- Manager can enter/confirm the employee email before clicking Approve or Reject.
+- The manager action updates the leave status and calls send-leave-decision-email.
+- The Edge Function sends APPROVED or REJECTED to that exact email.

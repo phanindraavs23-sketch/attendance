@@ -19,8 +19,200 @@ table{width:100%;border-collapse:collapse;margin-top:14px}th,td{padding:11px;bor
 .small{color:#666;font-size:13px}
 @media(max-width:800px){.grid,.controls{grid-template-columns:1fr 1fr}table{font-size:13px;display:block;overflow:auto;white-space:nowrap}}
 </style>
+<style>
+/* ===== 118 Attendance Portal — unified premium UI ===== */
+:root{
+  --p-bg:#f4f7fb;
+  --p-surface:rgba(255,255,255,.92);
+  --p-ink:#122033;
+  --p-muted:#64748b;
+  --p-line:#e2e8f0;
+  --p-brand:#2563eb;
+  --p-brand2:#7c3aed;
+  --p-success:#059669;
+  --p-danger:#dc2626;
+  --p-shadow:0 18px 55px rgba(15,23,42,.09);
+}
+html{scroll-behavior:smooth}
+body{
+  font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif !important;
+  background:
+    radial-gradient(circle at 8% -5%,rgba(59,130,246,.18),transparent 28%),
+    radial-gradient(circle at 96% 2%,rgba(124,58,237,.14),transparent 27%),
+    linear-gradient(180deg,#f8fbff 0%,var(--p-bg) 100%) !important;
+  color:var(--p-ink) !important;
+}
+.portal-nav{
+  position:sticky;top:0;z-index:1000;
+  width:100%;
+  display:flex;align-items:center;gap:12px;
+  padding:12px max(18px,calc((100% - 1240px)/2));
+  background:rgba(255,255,255,.82);
+  border-bottom:1px solid rgba(226,232,240,.9);
+  backdrop-filter:blur(18px);
+  box-shadow:0 8px 30px rgba(15,23,42,.05);
+}
+.portal-brand{
+  display:flex;align-items:center;gap:10px;
+  color:var(--p-ink);text-decoration:none;font-weight:850;
+  margin-right:10px;white-space:nowrap;
+}
+.portal-logo{
+  width:38px;height:38px;border-radius:12px;
+  display:grid;place-items:center;color:white;font-size:12px;font-weight:900;
+  background:linear-gradient(135deg,var(--p-brand),var(--p-brand2));
+  box-shadow:0 8px 20px rgba(37,99,235,.25);
+}
+.portal-links{
+  display:flex;align-items:center;gap:4px;overflow-x:auto;
+  scrollbar-width:none;flex:1;
+}
+.portal-links::-webkit-scrollbar{display:none}
+.portal-links a{
+  color:#475569;text-decoration:none;font-size:13px;font-weight:700;
+  padding:9px 11px;border-radius:10px;white-space:nowrap;
+  transition:.18s ease;
+}
+.portal-links a:hover{background:#eff6ff;color:var(--p-brand)}
+.portal-links a.active{background:#eef2ff;color:#4f46e5}
+.portal-secure{
+  font-size:11px;font-weight:800;color:#047857;
+  background:#ecfdf5;border:1px solid #bbf7d0;
+  border-radius:999px;padding:7px 10px;white-space:nowrap;
+}
+body > .wrap, body > .container{position:relative}
+.card{
+  border-color:rgba(226,232,240,.9) !important;
+  box-shadow:var(--p-shadow) !important;
+}
+input,select,textarea,.field{
+  transition:border-color .18s,box-shadow .18s,transform .18s;
+}
+input:focus,select:focus,textarea:focus,.field:focus{
+  border-color:#60a5fa !important;
+  box-shadow:0 0 0 4px rgba(59,130,246,.10) !important;
+  outline:none;
+}
+button{
+  transition:transform .18s,box-shadow .18s,opacity .18s !important;
+}
+button:not(:disabled):hover{
+  transform:translateY(-1px);
+  box-shadow:0 8px 18px rgba(15,23,42,.14);
+}
+table{border-collapse:separate !important;border-spacing:0 !important;overflow:hidden;border:1px solid var(--p-line);border-radius:14px}
+th{
+  background:linear-gradient(180deg,#f8fafc,#f1f5f9) !important;
+  color:#475569;font-size:12px;text-transform:uppercase;letter-spacing:.04em;
+}
+th,td{border-bottom:1px solid var(--p-line) !important}
+tr:last-child td{border-bottom:0 !important}
+.badge{font-weight:800}
+@media(max-width:760px){
+  .portal-nav{padding:10px 12px;gap:8px}
+  .portal-brand span:last-child{display:none}
+  .portal-secure{display:none}
+}
+
+/* Dashboard refinement */
+.wrap{
+  max-width:1280px !important;
+  padding:30px 22px 60px !important;
+}
+.wrap > h1{
+  font-size:clamp(28px,4vw,40px);
+  letter-spacing:-.035em;
+  margin:8px 0 6px !important;
+}
+.wrap > .small{color:var(--p-muted)}
+.grid{gap:16px !important}
+.stat{
+  background:linear-gradient(145deg,#fff,#f8fbff) !important;
+  border:1px solid var(--p-line) !important;
+  border-radius:17px !important;
+  box-shadow:0 8px 25px rgba(15,23,42,.05);
+  position:relative;overflow:hidden;
+}
+.stat:before{
+  content:"";position:absolute;inset:0 auto 0 0;width:4px;
+  background:linear-gradient(180deg,var(--p-brand),var(--p-brand2));
+}
+.num{font-size:32px !important;color:var(--p-ink)}
+.controls{
+  padding:4px;
+  background:#f8fafc;
+  border:1px solid var(--p-line);
+  border-radius:16px;
+}
+.controls input,.controls select{background:#fff;border-color:#dbe3ee}
+.login{
+  background:rgba(255,255,255,.96) !important;
+  border:1px solid var(--p-line) !important;
+  border-radius:24px !important;
+  padding:30px !important;
+  box-shadow:var(--p-shadow) !important;
+}
+.login h1{letter-spacing:-.035em}
+@media(max-width:800px){
+  .grid,.controls{grid-template-columns:1fr !important}
+  .wrap{padding:22px 14px 45px !important}
+}
+</style>
+<script src="portal-roles.js"></script>
+<style>
+.multi-role-panel{
+  margin:18px 0;padding:20px;border:1px solid #e2e8f0;border-radius:18px;
+  background:linear-gradient(145deg,#fff,#f8fbff);box-shadow:0 10px 30px rgba(15,23,42,.06)
+}
+.multi-role-panel h3{margin:0 0 8px;font-size:16px}
+.multi-role-panel p{margin:0 0 14px;color:#64748b;font-size:13px}
+.role-email-list{display:flex;flex-wrap:wrap;gap:8px}
+.role-email{
+  padding:7px 10px;border-radius:999px;background:#eef2ff;color:#3730a3;
+  font-size:12px;font-weight:800;border:1px solid #c7d2fe
+}
+.role-email.manager{background:#ecfdf5;color:#065f46;border-color:#bbf7d0}
+</style>
 </head>
 <body>
+
+<nav class="portal-nav" aria-label="Main portal navigation">
+  <a class="portal-brand" href="portal.html" aria-label="118 Attendance home">
+    <span class="portal-logo">118</span><span>118 Attendance</span>
+  </a>
+  <div class="portal-links">
+    <a href="portal.html">Portal</a>
+    <a href="attendance.html">Attendance</a>
+    <a href="leave.html">Apply Leave</a>
+    <a href="leave-status.html">Leave Status</a>
+    <a href="manager.html">Manager</a>
+    <a href="hr.html">HR</a>
+  </div>
+  <span class="portal-secure">● Secure Portal</span>
+</nav>
+<section class="multi-role-panel">
+  <h3>Authorized portal accounts</h3>
+  <p>Multiple HR and Manager accounts are supported. Update <b>portal-roles.js</b> with your real company email IDs.</p>
+  <div class="role-email-list">
+    <span class="role-email">HR · hr1@company.com</span>
+    <span class="role-email">HR · hr2@company.com</span>
+    <span class="role-email">HR · hr3@company.com</span>
+    <span class="role-email manager">Manager · manager1@company.com</span>
+    <span class="role-email manager">Manager · manager2@company.com</span>
+    <span class="role-email manager">Manager · manager3@company.com</span>
+  </div>
+</section>
+
+<script>
+(function(){
+  const page=(location.pathname.split('/').pop()||'portal.html').toLowerCase();
+  document.querySelectorAll('.portal-links a').forEach(a=>{
+    const target=a.getAttribute('href').toLowerCase();
+    if(target===page || (page==='index.html' && target==='portal.html')) a.classList.add('active');
+  });
+})();
+</script>
+
 <div id="loginView" class="login card">
 <h1>Attendance Admin</h1>
 <p>HR and Manager dashboard</p>

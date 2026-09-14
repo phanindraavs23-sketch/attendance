@@ -1,0 +1,28 @@
+MULTI HR / MANAGER SETUP
+=========================
+
+This version supports multiple HR and Manager email IDs.
+
+Edit:
+  portal-roles.js
+
+Example:
+  hr: [
+    "hr1@yourcompany.com",
+    "hr2@yourcompany.com",
+    "hr3@yourcompany.com"
+  ],
+  manager: [
+    "manager1@yourcompany.com",
+    "manager2@yourcompany.com",
+    "manager3@yourcompany.com"
+  ]
+
+IMPORTANT:
+This email registry is useful for the GitHub Pages demo/UI, but it is NOT
+a security boundary. For production, mirror these roles in Supabase:
+  profiles/users table -> role = 'hr' or 'manager'
+and enforce access with Supabase Row Level Security (RLS).
+
+The placeholder emails have NOT been added as real Supabase Auth users.
+Create those accounts in Supabase Authentication when you are ready.
