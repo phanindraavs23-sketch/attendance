@@ -1,160 +1,49 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>118 Attendance — Portal</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>118 Attendance — Employee Portal</title>
 <style>
-  :root {
-    --ink: #1c2321;
-    --paper: #f6f5f1;
-    --line: #d8d5cc;
-    --accent: #2f5d50;
-    --accent-soft: #e4ede9;
-  }
-
-  * { box-sizing: border-box; }
-
-  body {
-    margin: 0;
-    min-height: 100vh;
-    background: var(--paper);
-    color: var(--ink);
-    font-family: "Georgia", "Iowan Old Style", serif;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 64px 24px;
-  }
-
-  header {
-    max-width: 560px;
-    text-align: left;
-    margin-bottom: 48px;
-    width: 100%;
-  }
-
-  h1 {
-    font-size: 2.1rem;
-    font-weight: 500;
-    margin: 0 0 8px;
-    letter-spacing: -0.01em;
-  }
-
-  header p {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    color: #5a5f5c;
-    font-size: 0.98rem;
-    margin: 0;
-    line-height: 1.5;
-  }
-
-  nav {
-    width: 100%;
-    max-width: 560px;
-    border-top: 1px solid var(--line);
-  }
-
-  .link-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    text-decoration: none;
-    color: var(--ink);
-    padding: 26px 4px;
-    border-bottom: 1px solid var(--line);
-    transition: padding-left 0.15s ease;
-  }
-
-  .link-row:hover {
-    padding-left: 12px;
-    background: var(--accent-soft);
-  }
-
-  .link-main {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
-
-  .link-title {
-    font-size: 1.25rem;
-    font-weight: 500;
-  }
-
-  .link-desc {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    font-size: 0.88rem;
-    color: #6b706c;
-  }
-
-  .arrow {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    font-size: 1.3rem;
-    color: var(--accent);
-    flex-shrink: 0;
-    margin-left: 16px;
-  }
-
-  footer {
-    max-width: 560px;
-    width: 100%;
-    margin-top: 40px;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    font-size: 0.8rem;
-    color: #9a9d97;
-  }
-
-  @media (max-width: 480px) {
-    h1 { font-size: 1.7rem; }
-    .link-title { font-size: 1.1rem; }
-  }
+:root{--bg:#f4f7fb;--card:#fff;--ink:#132238;--muted:#64748b;--line:#e6ebf2;--brand:#2563eb;--brand2:#7c3aed;--green:#059669}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Arial,sans-serif;color:var(--ink);background:radial-gradient(circle at 15% 0%,#dbeafe 0,transparent 34%),radial-gradient(circle at 90% 10%,#ede9fe 0,transparent 30%),var(--bg);min-height:100vh}
+.container{max-width:1120px;margin:auto;padding:34px 22px 50px}.top{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-bottom:44px}.brand{display:flex;align-items:center;gap:13px}.logo{width:48px;height:48px;border-radius:15px;background:linear-gradient(135deg,var(--brand),var(--brand2));display:grid;place-items:center;color:#fff;font-weight:800;box-shadow:0 12px 28px #2563eb33}.brand h1{margin:0;font-size:20px}.brand p{margin:2px 0 0;color:var(--muted);font-size:13px}.pill{padding:9px 13px;border:1px solid var(--line);background:#ffffffb8;border-radius:999px;color:#475569;font-size:13px}
+.hero{display:grid;grid-template-columns:1.25fr .75fr;gap:22px;margin-bottom:24px}.hero-main,.hero-side{background:#ffffffd9;border:1px solid #fff;border-radius:28px;box-shadow:0 22px 60px #1e293b14;backdrop-filter:blur(10px)}.hero-main{padding:38px}.eyebrow{color:var(--brand);font-weight:800;font-size:12px;letter-spacing:.12em;text-transform:uppercase}.hero h2{font-size:clamp(32px,5vw,54px);line-height:1.02;letter-spacing:-.045em;margin:12px 0 15px}.hero h2 span{background:linear-gradient(90deg,var(--brand),var(--brand2));-webkit-background-clip:text;background-clip:text;color:transparent}.hero p{color:var(--muted);line-height:1.7;max-width:650px;margin:0 0 25px}.cta{display:inline-flex;align-items:center;gap:9px;padding:13px 17px;border-radius:13px;background:var(--brand);color:#fff;text-decoration:none;font-weight:700;box-shadow:0 12px 24px #2563eb33}.hero-side{padding:28px;display:flex;flex-direction:column;justify-content:space-between}.status{padding:15px;border-radius:16px;background:#ecfdf5;border:1px solid #a7f3d0}.status b{color:#047857}.mini{color:var(--muted);font-size:13px;line-height:1.6}.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}.card{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:24px;text-decoration:none;color:inherit;box-shadow:0 12px 35px #1e293b0b;transition:.2s}.card:hover{transform:translateY(-4px);box-shadow:0 18px 42px #1e293b18}.icon{width:44px;height:44px;border-radius:13px;background:#eff6ff;color:var(--brand);display:grid;place-items:center;font-size:21px;margin-bottom:17px}.card:nth-child(2) .icon{background:#f5f3ff;color:#7c3aed}.card:nth-child(3) .icon{background:#ecfdf5;color:#059669}.card h3{margin:0 0 7px;font-size:18px}.card p{margin:0;color:var(--muted);font-size:14px;line-height:1.6}.arrow{float:right;color:#94a3b8;font-size:22px}.admin{margin-top:18px;display:grid;grid-template-columns:1fr 1fr;gap:18px}.admin .card:nth-child(1) .icon{background:#fff7ed;color:#ea580c}.admin .card:nth-child(2) .icon{background:#fdf2f8;color:#db2777}footer{text-align:center;color:#94a3b8;font-size:12px;margin-top:34px}
+@media(max-width:760px){.hero{grid-template-columns:1fr}.cards,.admin{grid-template-columns:1fr}.top{align-items:flex-start}.hero-main{padding:27px}.container{padding-top:22px}}
 </style>
 </head>
 <body>
+<div class="container">
+  <div class="top">
+    <div class="brand"><div class="logo">118</div><div><h1>118 Attendance</h1><p>Employee attendance & leave management</p></div></div>
+    <div class="pill">Secure employee portal</div>
+  </div>
 
-  <header>
-    <h1>118 Attendance</h1>
-    <p>Pick where you need to go — attendance, HR, or the manager dashboard.</p>
-  </header>
+  <section class="hero">
+    <div class="hero-main">
+      <div class="eyebrow">Employee Portal</div>
+      <h2>Simple attendance.<br><span>Smarter leave management.</span></h2>
+      <p>Mark your daily attendance with the QR code, submit leave requests, and receive an email when your leave is approved or rejected.</p>
+      <a class="cta" href="attendance.html">Open Attendance <span>→</span></a>
+    </div>
+    <div class="hero-side">
+      <div class="status"><b>● System ready</b><div class="mini">QR attendance and leave requests are available.</div></div>
+      <div class="mini"><strong>Tip:</strong> Use your company email when applying for leave so you receive the manager's decision instantly.</div>
+    </div>
+  </section>
 
-  <nav>
-    <a class="link-row" href="attendance.html">
-      <span class="link-main">
-        <span class="link-title">Attendance</span>
-        <span class="link-desc">Log in or out with the QR attendance form</span>
-      </span>
-      <span class="arrow">→</span>
-    </a>
+  <section class="cards">
+    <a class="card" href="attendance.html"><div class="icon">✓</div><span class="arrow">↗</span><h3>Attendance</h3><p>Log in or log out using the daily QR attendance form.</p></a>
+    <a class="card" href="leave.html"><div class="icon">📅</div><span class="arrow">↗</span><h3>Apply for Leave</h3><p>Submit dates and reason. Track your request through manager approval.</p></a>
+    <a class="card" href="calendar_config.js"><div class="icon">🗓</div><span class="arrow">↗</span><h3>Holiday Calendar</h3><p>View configured public holidays and leave calendar information.</p></a>
+  </section>
 
-    <a class="link-row" href="leave.html">
-      <span class="link-main">
-        <span class="link-title">Apply for Leave</span>
-        <span class="link-desc">Submit a leave request for manager approval</span>
-      </span>
-      <span class="arrow">→</span>
-    </a>
+  <section class="admin">
+    <a class="card" href="hr.html"><div class="icon">HR</div><span class="arrow">↗</span><h3>HR Dashboard</h3><p>Attendance records, leave reports and CSV export.</p></a>
+    <a class="card" href="manager.html"><div class="icon">M</div><span class="arrow">↗</span><h3>Manager Dashboard</h3><p>Team attendance plus approve or reject leave requests.</p></a>
+  </section>
 
-    <a class="link-row" href="hr.html">
-      <span class="link-main">
-        <span class="link-title">HR</span>
-        <span class="link-desc">HR dashboard — records, leave, and reports</span>
-      </span>
-      <span class="arrow">→</span>
-    </a>
-
-    <a class="link-row" href="manager.html">
-      <span class="link-main">
-        <span class="link-title">Manager</span>
-        <span class="link-desc">Team attendance, approvals, and CSV export</span>
-      </span>
-      <span class="arrow">→</span>
-    </a>
-  </nav>
-
-  <footer>
-    118 Employee Attendance Portal
-  </footer>
-
+  <footer>118 Employee Attendance Portal • GitHub Pages + Supabase</footer>
+</div>
 </body>
 </html>
