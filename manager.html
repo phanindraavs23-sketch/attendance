@@ -305,14 +305,9 @@ async function decideLeave(id, status) {
     document.getElementById('leaveMsg').innerHTML = '<span class="error">' + esc(error.message) + '</span>';
     return;
   }
-  // Send the decision email securely through the Supabase Edge Function.
-  const emailResult = await sb.functions.invoke('send-leave-decision-email', {
-    body: { leave_request_id: id }
-  });
-  if (emailResult.error) {
-    document.getElementById('leaveMsg').innerHTML =
-      '<span class="error">Decision saved, but the email could not be sent. Check the email Edge Function setup.</span>';
-  }
+  // A database trigger (see supabase/leave_decision_email_trigger.sql) sends
+  // the decision email automatically whenever status changes — no client
+  // call needed here, and it also covers decisions made outside the browser.
   await loadLeaveRequests();
 }
 

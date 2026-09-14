@@ -1,0 +1,65 @@
+LEAVE EMAIL NOTIFICATION SETUP
+
+This version adds:
+1. Employee email field on the leave form.
+2. Manager approve/reject sends a notification email.
+3. HR/Manager authorization is checked inside the Edge Function.
+4. Resend is used as the email provider so the Resend API key is NOT exposed in GitHub Pages.
+
+STEP 1 — Update Supabase database
+Run:
+  supabase/leave_requests.sql
+
+If your existing leave_requests table already has rows, the new employee_email column may contain NULLs.
+Populate those old rows before enforcing NOT NULL.
+
+STEP 2 — Create a Resend account/domain
+Create a verified sending domain/address in Resend.
+Keep the Resend API key private.
+
+STEP 3 — Deploy the Edge Function
+From your Supabase project directory:
+  supabase functions deploy send-leave-decision-email
+
+STEP 4 — Set Edge Function secrets
+Set these secrets in Supabase:
+  RESEND_API_KEY = your Resend API key
+  LEAVE_FROM_EMAIL = 118 Attendance <notifications@your-verified-domain.com>
+
+SUPABASE_URL, SUPABASE_ANON_KEY and SUPABASE_SERVICE_ROLE_KEY are available to Supabase Edge Functions automatically in a normal project deployment. Do NOT place the service-role key in config.js or any browser HTML.
+
+STEP 5 — Test
+1. Open leave.html.
+2. Enter employee name, ID and company email.
+3. Submit a leave request.
+4. Sign in to manager.html.
+5. Click Approve or Reject.
+6. The employee receives the decision email.
+
+STEP 6 — Make it fire on every status change, everywhere (recommended)
+Instead of the Manager dashboard calling the Edge Function directly (which
+only covers approvals made in that one page), a database trigger now sends
+the email automatically whenever a leave_requests row's status changes to
+APPROVED or REJECTED — whether that happens in the Manager dashboard, a
+future HR approval screen, the Supabase SQL editor, or any other tool.
+
+1. Generate a random secret, e.g.: openssl rand -hex 32
+2. Set it on the Edge Function:
+     supabase secrets set LEAVE_WEBHOOK_SECRET=<the random string>
+3. Open supabase/leave_decision_email_trigger.sql and replace:
+     <YOUR_SUPABASE_PROJECT_URL>   with your project URL (https://xxxx.supabase.co)
+     <YOUR_LEAVE_WEBHOOK_SECRET>   with the SAME random string from step 1
+4. Run the edited file in the Supabase SQL editor.
+5. Test by changing a request's status directly in the SQL editor — the
+   employee should receive the email with no browser involved.
+
+The Manager dashboard no longer calls the Edge Function itself (manager.html
+just updates the row); the trigger is now the single source of these emails,
+so employees are never emailed twice for one decision.
+
+IMPORTANT
+- The database decision is saved even if the email provider fails.
+- The trigger call is fire-and-forget (async via pg_net), so a slow or
+  failing email provider never blocks or fails the status update itself.
+- Check Database > Webhooks/Logs or the pg_net response tables in Supabase
+  if an email doesn't arrive, to see the HTTP status the Edge Function returned.
