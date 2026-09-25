@@ -150,7 +150,7 @@ tr:last-child td{border-bottom:0 !important}
 <div class="head"><div class="logo">118</div><h1>Apply for Leave</h1><p>Submit your leave request using your Employee ID. No employee email is required.</p></div>
 <div class="form">
 <label class="label" for="employeeName">Employee Name</label><input class="field" id="employeeName" placeholder="Enter your full name" autocomplete="name">
-<label class="label" for="employeeId">Employee ID</label><input class="field" id="employeeId" placeholder="Enter Employee ID">
+<label class="label" for="employeeId">Employee ID</label><input class="field" id="employeeId" placeholder="Enter Employee ID" inputmode="numeric" pattern="[0-9]*">
 <label class="label" for="employeeLocation">Location</label><input class="field" id="employeeLocation" placeholder="Office / Home / Site">
 <label class="label">Leave dates</label><div class="row2"><input class="field" id="startDate" type="date"><input class="field" id="endDate" type="date"></div>
 <label class="label" for="reason">Reason</label><textarea id="reason" rows="4" placeholder="Reason for leave"></textarea>
@@ -162,11 +162,12 @@ const sb=supabase.createClient(window.SUPABASE_URL,window.SUPABASE_KEY),msg=docu
 const params=new URLSearchParams(location.search);
 const qrName=params.get('name')||'',qrEmployeeId=params.get('employeeId')||params.get('employee_id')||'',qrLocation=params.get('location')||'';
 if(qrName) employeeName.value=qrName;if(qrEmployeeId) employeeId.value=qrEmployeeId;if(qrLocation) employeeLocation.value=qrLocation;
+employeeId.addEventListener('input',()=>{employeeId.value=employeeId.value.replace(/\D/g,'');});
 let isSubmitting=false,alreadySubmitted=false;
 async function submitLeave(){
  if(isSubmitting||alreadySubmitted)return;
  const employee_name=employeeName.value.trim(),employee_id=employeeId.value.trim(),location=employeeLocation.value.trim(),start_date=startDate.value,end_date=endDate.value,reason=document.getElementById('reason').value.trim();
- if(!employee_name)return fail('Please enter your employee name.');if(!employee_id)return fail('Please enter your Employee ID.');
+ if(!employee_name)return fail('Please enter your employee name.');if(!employee_id)return fail('Please enter your Employee ID.');if(!/^\d+$/.test(employee_id))return fail('Employee ID must contain numbers only.');
  if(!start_date||!end_date)return fail('Please select a start and end date.');if(end_date<start_date)return fail('End date cannot be before start date.');if(!reason)return fail('Please enter a reason.');
  isSubmitting=true;setBusy(true);msg.innerHTML='';
  const {error}=await sb.from('leave_requests').insert({employee_id,employee_name,location:location||null,start_date,end_date,reason});

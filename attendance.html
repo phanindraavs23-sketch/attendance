@@ -182,7 +182,7 @@ button.logout{background:#334155 !important}
 <input class="field" id="employeeName" placeholder="Enter employee name" autocomplete="name">
 
 <label class="label" for="employeeId">Employee ID</label>
-<input class="field" id="employeeId" placeholder="Enter Employee ID" autocomplete="off">
+<input class="field" id="employeeId" placeholder="Enter Employee ID" autocomplete="off" inputmode="numeric" pattern="[0-9]*">
 
 <label class="label" for="employeeLocation">Location</label>
 <input class="field" id="employeeLocation" placeholder="Enter location (e.g. Office / Home)" autocomplete="off">
@@ -207,6 +207,7 @@ const nameInput = document.getElementById('employeeName');
 const idInput = document.getElementById('employeeId');
 const locationInput = document.getElementById('employeeLocation');
 const msg = document.getElementById('msg');
+idInput.addEventListener('input', () => { idInput.value = idInput.value.replace(/\D/g, ''); });
 
 const params = new URLSearchParams(window.location.search);
 const qrName = params.get('name') || '';
@@ -291,6 +292,7 @@ async function mark(action) {
 
   if (!employeeName) return fail('Please enter your employee name.');
   if (!employeeId) return fail('Please enter your Employee ID.');
+  if (!/^\d+$/.test(employeeId)) return fail('Employee ID must contain numbers only.');
   if (!employeeLocation) return fail('Please enter your location.');
 
   setBusy(true);

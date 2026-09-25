@@ -150,7 +150,7 @@ tr:last-child td{border-bottom:0 !important}
 <div class="head"><div class="logo">118</div><h1>Leave Status</h1><p>Login with your Employee ID to view your leave requests and see whether each request is pending, approved, or rejected.</p></div>
 <div class="form">
 <label class="label" for="employeeId">Employee ID</label>
-<div class="row"><input class="field" id="employeeId" placeholder="e.g. EMP001" autocomplete="off"><button class="btn" id="checkBtn" onclick="checkStatus()">Check Leave Status</button></div>
+<div class="row"><input class="field" id="employeeId" placeholder="e.g. 1001" autocomplete="off" inputmode="numeric" pattern="[0-9]*"><button class="btn" id="checkBtn" onclick="checkStatus()">Check Leave Status</button></div>
 <div id="msg" class="msg"></div><div id="results"></div>
 </div></div></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config.js"></script>
