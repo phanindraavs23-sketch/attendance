@@ -1,0 +1,46 @@
+GPS Location — Setup
+=====================
+
+What changed
+------------
+attendance.html now captures the employee's GPS coordinates (via the
+browser's Geolocation API) automatically when the page loads, in addition
+to the existing free-text Location field (e.g. "Office" / "Home").
+
+- The employee still types the Location field as before — that part is
+  unchanged and still required.
+- On page load, the browser will prompt the employee to allow location
+  access. If allowed, the captured latitude/longitude/accuracy are shown
+  under the Location field and saved with the LOGIN/LOGOUT record.
+- If the employee denies access, their device doesn't support GPS, or
+  they're indoors with a weak signal, a "Retry GPS capture" button
+  appears. Submission is NOT blocked if GPS isn't available — the
+  attendance record is still saved, just without coordinates.
+- After a successful submission, a "View captured GPS location on map"
+  link appears (opens Google Maps) when GPS was captured.
+- hr.html, manager.html, and hr-manager.html now show a "GPS" column
+  with a Map link for each record that has coordinates, and the HR CSV
+  export includes GPS Latitude / GPS Longitude columns.
+
+Required: run this SQL in Supabase
+-----------------------------------
+Open your Supabase project → SQL Editor → run:
+
+    supabase/add_gps_location.sql
+
+This adds three new nullable columns to the attendance table
+(gps_lat, gps_lng, gps_accuracy) and re-creates the public insert policy
+so anonymous/authenticated attendance submissions can include them.
+Nothing else changes — existing rows and the existing Location column
+are untouched.
+
+Notes
+-----
+- GPS only works over HTTPS (GitHub Pages serves HTTPS, so this is fine)
+  or on localhost during local testing.
+- Accuracy is in meters and reflects the device's own GPS/Wi-Fi
+  positioning accuracy — expect ~5-50m outdoors on a phone, and it can
+  be much worse indoors.
+- If you want GPS capture to be *mandatory* (block Login/Logout until
+  coordinates are captured), that's a small follow-up change to
+  attendance.html's mark() function — ask if you'd like that added.

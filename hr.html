@@ -278,7 +278,7 @@ tr:last-child td{border-bottom:0 !important}
 </div>
 <div id="tableMsg" class="small" style="margin-top:12px"></div>
 <table>
-<thead><tr><th>Name</th><th>Employee ID</th><th>Location</th><th>Action</th><th>Login / Logout Time</th></tr></thead>
+<thead><tr><th>Name</th><th>Employee ID</th><th>Location</th><th>GPS</th><th>Action</th><th>Login / Logout Time</th></tr></thead>
 <tbody id="rows"></tbody>
 </table>
 </div>
@@ -333,7 +333,7 @@ async function loadData() {
   const msg = document.getElementById('tableMsg');
   msg.textContent = 'Loading...';
   const { data, error } = await sb.from('attendance')
-    .select('employee_name,employee_id,location,action,recorded_at')
+    .select('employee_name,employee_id,location,gps_lat,gps_lng,action,recorded_at')
     .order('recorded_at', { ascending: false })
     .limit(5000);
   if (error) {
@@ -363,12 +363,19 @@ function render() {
     new Set(allRows.filter(r => (r.recorded_at || '').slice(0, 10) === today).map(r => r.employee_id)).size;
   document.getElementById('rows').innerHTML =
     rows.map(r => `<tr><td>${esc(r.employee_name)}</td><td>${esc(r.employee_id)}</td>
-    <td>${esc(r.location)}</td><td><span class="badge ${r.action === 'LOGIN' ? 'loginb' : 'logoutb'}">${r.action}</span></td>
+    <td>${esc(r.location)}</td><td>${gpsLink(r.gps_lat, r.gps_lng)}</td><td><span class="badge ${r.action === 'LOGIN' ? 'loginb' : 'logoutb'}">${r.action}</span></td>
     <td>${formatTime(r.recorded_at)}</td></tr>`).join('') ||
-    '<tr><td colspan="5">No records found.</td></tr>';
+    '<tr><td colspan="6">No records found.</td></tr>';
   document.getElementById('tableMsg').textContent = rows.length + ' record(s)';
 }
 
+
+function gpsLink(lat, lng) {
+  if (lat === null || lat === undefined || lng === null || lng === undefined) {
+    return '<span class="small">—</span>';
+  }
+  return '<a href="https://www.google.com/maps?q=' + lat + ',' + lng + '" target="_blank" rel="noopener">Map</a>';
+}
 
 function exportCSV() {
   const search = document.getElementById('search').value.trim().toLowerCase();
@@ -390,13 +397,15 @@ function exportCSV() {
     return;
   }
 
-  const header = ['Employee Name','Employee ID','Location','Action','Login / Logout Time'];
+  const header = ['Employee Name','Employee ID','Location','GPS Latitude','GPS Longitude','Action','Login / Logout Time'];
   const csvRows = [
     header,
     ...rows.map(r => [
       r.employee_name ?? '',
       r.employee_id ?? '',
       r.location ?? '',
+      r.gps_lat ?? '',
+      r.gps_lng ?? '',
       r.action ?? '',
       r.recorded_at ? new Date(r.recorded_at).toLocaleString('en-IN') : ''
     ])

@@ -21,6 +21,10 @@ button:disabled{opacity:.55;cursor:not-allowed}
 .error{background:#fdecec;color:#b42318;padding:15px;border-radius:10px;margin-top:15px}
 .small{font-size:13px;color:#666}
 .hint{font-size:14px;color:#555;margin-top:5px}
+.gps-box{margin-top:10px;padding:10px 12px;border-radius:10px;background:#f8f9fa;border:1px solid #e2e8f0;font-size:13px;color:#555}
+.gps-box.ok{background:#e8f7ed;border-color:#bbf7d0;color:#065f46}
+.gps-box.err{background:#fdecec;border-color:#fecaca;color:#b42318}
+.gps-retry{width:auto !important;display:inline-block;margin-top:6px !important;padding:8px 14px !important;font-size:13px !important;background:#334155 !important}
 </style>
 <style>
 /* ===== 118 Attendance Portal — unified premium UI ===== */
@@ -183,6 +187,11 @@ button.logout{background:#334155 !important}
 <label class="label" for="employeeLocation">Location</label>
 <input class="field" id="employeeLocation" placeholder="Enter location (e.g. Office / Home)" autocomplete="off">
 
+<div id="gpsBox" class="gps-box">
+  <div id="gpsStatus" class="gps-status">📍 Detecting your GPS location…</div>
+  <button type="button" id="gpsRetryBtn" class="gps-retry" onclick="captureGps()" style="display:none">Retry GPS capture</button>
+</div>
+
 <button id="loginBtn" onclick="mark('LOGIN')">Login</button>
 <button id="logoutBtn" class="logout" onclick="mark('LOGOUT')">Logout</button>
 <div id="msg"></div>
@@ -221,6 +230,48 @@ if (qrExpired) {
   setBusy(true);
 }
 
+// ---- GPS location capture ----
+let gpsCoords = null; // { lat, lng, accuracy }
+const gpsBox = document.getElementById('gpsBox');
+const gpsStatus = document.getElementById('gpsStatus');
+const gpsRetryBtn = document.getElementById('gpsRetryBtn');
+
+function setGpsUi(state, text) {
+  gpsBox.classList.remove('ok', 'err');
+  if (state) gpsBox.classList.add(state);
+  gpsStatus.textContent = text;
+  gpsRetryBtn.style.display = state === 'err' ? 'inline-block' : 'none';
+}
+
+function captureGps() {
+  if (!('geolocation' in navigator)) {
+    gpsCoords = null;
+    setGpsUi('err', '⚠️ GPS is not supported on this device/browser. You can still submit without it.');
+    return;
+  }
+  setGpsUi(null, '📍 Detecting your GPS location…');
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      gpsCoords = {
+        lat: pos.coords.latitude,
+        lng: pos.coords.longitude,
+        accuracy: pos.coords.accuracy
+      };
+      setGpsUi('ok', '📍 GPS captured: ' + gpsCoords.lat.toFixed(5) + ', ' + gpsCoords.lng.toFixed(5) +
+        ' (±' + Math.round(gpsCoords.accuracy) + 'm)');
+    },
+    (err) => {
+      gpsCoords = null;
+      let reason = 'Location unavailable.';
+      if (err.code === err.PERMISSION_DENIED) reason = 'Location permission denied.';
+      else if (err.code === err.TIMEOUT) reason = 'Location request timed out.';
+      setGpsUi('err', '⚠️ ' + reason + ' You can still submit, or tap retry after enabling location access.');
+    },
+    { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
+  );
+}
+captureGps();
+
 const qrTarget = new URL('attendance.html', window.location.href).href;
 function renderQr() {
   const qrEl = document.getElementById('qrcode');
@@ -250,7 +301,10 @@ async function mark(action) {
     employee_id: employeeId,
     employee_name: employeeName,
     location: employeeLocation,
-    action: action
+    action: action,
+    gps_lat: gpsCoords ? gpsCoords.lat : null,
+    gps_lng: gpsCoords ? gpsCoords.lng : null,
+    gps_accuracy: gpsCoords ? gpsCoords.accuracy : null
   });
 
   setBusy(false);
@@ -258,14 +312,22 @@ async function mark(action) {
     if ((error.message || '').toLowerCase().includes('session_token')) {
       return fail('Supabase still requires the old session_token column. Run supabase/fix_session_token.sql in Supabase SQL Editor, then try again.');
     }
+    if ((error.message || '').toLowerCase().includes('gps_lat') || (error.message || '').toLowerCase().includes('gps_lng') || (error.message || '').toLowerCase().includes('gps_accuracy')) {
+      return fail('Supabase needs the new GPS columns. Run supabase/add_gps_location.sql in Supabase SQL Editor, then try again.');
+    }
     return fail(error.message);
   }
+
+  const mapLink = gpsCoords
+    ? '<br><a href="https://www.google.com/maps?q=' + gpsCoords.lat + ',' + gpsCoords.lng + '" target="_blank" rel="noopener">View captured GPS location on map</a>'
+    : '<br><span class="small">GPS location was not captured for this entry.</span>';
 
   msg.innerHTML = '<div class="ok"><b>' + esc(employeeName) + '</b><br>' +
     'Employee ID: <b>' + esc(employeeId) + '</b><br>' +
     'Location: <b>' + esc(employeeLocation) + '</b><br>' +
     'Attendance <b>' + action + '</b> recorded successfully.<br>' +
-    '<span class="small">Date/time is saved automatically by the Supabase server.</span></div>';
+    '<span class="small">Date/time is saved automatically by the Supabase server.</span>' +
+    mapLink + '</div>';
 }
 
 function setBusy(busy) {
