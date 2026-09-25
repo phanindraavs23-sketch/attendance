@@ -162,14 +162,20 @@ const sb=supabase.createClient(window.SUPABASE_URL,window.SUPABASE_KEY),msg=docu
 const params=new URLSearchParams(location.search);
 const qrName=params.get('name')||'',qrEmployeeId=params.get('employeeId')||params.get('employee_id')||'',qrLocation=params.get('location')||'';
 if(qrName) employeeName.value=qrName;if(qrEmployeeId) employeeId.value=qrEmployeeId;if(qrLocation) employeeLocation.value=qrLocation;
+let isSubmitting=false,alreadySubmitted=false;
 async function submitLeave(){
+ if(isSubmitting||alreadySubmitted)return;
  const employee_name=employeeName.value.trim(),employee_id=employeeId.value.trim(),location=employeeLocation.value.trim(),start_date=startDate.value,end_date=endDate.value,reason=document.getElementById('reason').value.trim();
  if(!employee_name)return fail('Please enter your employee name.');if(!employee_id)return fail('Please enter your Employee ID.');
  if(!start_date||!end_date)return fail('Please select a start and end date.');if(end_date<start_date)return fail('End date cannot be before start date.');if(!reason)return fail('Please enter a reason.');
- setBusy(true);msg.innerHTML='';
+ isSubmitting=true;setBusy(true);msg.innerHTML='';
  const {error}=await sb.from('leave_requests').insert({employee_id,employee_name,location:location||null,start_date,end_date,reason});
- setBusy(false);if(error)return fail(error.message);
- msg.innerHTML='<div class="ok"><b>Leave request submitted successfully.</b><br>'+esc(employee_name)+' ('+esc(employee_id)+')<br>'+esc(start_date)+' to '+esc(end_date)+'<br><span class="small">Use the Leave Status portal with your Employee ID to check the decision.</span></div>';
+ isSubmitting=false;
+ if(error){setBusy(false);return fail(error.message);}
+ alreadySubmitted=true;
+ document.getElementById('submitBtn').textContent='Request submitted';
+ msg.innerHTML='<div class="ok"><b>Leave request submitted successfully.</b><br>'+esc(employee_name)+' ('+esc(employee_id)+')<br>'+esc(start_date)+' to '+esc(end_date)+'<br><span class="small">Use the Leave Status portal with your Employee ID to check the decision.</span><br><br><a href="#" id="newReqLink">Submit another request</a></div>';
+ document.getElementById('newReqLink').onclick=function(e){e.preventDefault();alreadySubmitted=false;setBusy(false);document.getElementById('submitBtn').textContent='Submit Leave Request';msg.innerHTML='';};
 }
 function setBusy(v){document.getElementById('submitBtn').disabled=v}function fail(x){msg.innerHTML='<div class="error">'+esc(x)+'</div>'}
 function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
